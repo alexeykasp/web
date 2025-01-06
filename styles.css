@@ -1,0 +1,153 @@
+:root {
+    --primary-color: #8b0101;       /* Темно-красный */
+    --bg-dark: #140000;             /* Светло-черный */
+    --text-color: #54105a;          /* Индиго текст */
+    --header-bg: #3a0000;           /* Темно-красный фон заголовка */
+    --accent-bg: #1a0000;           /* Темно-красный фон акцента */
+    --hover-bg: #4a0000;            /* Красный при наведении */
+    --shadow-color: #ff0000;        /* Красное свечение */
+    --tooltip-bg: #2a0000;          /* Темно-красный фон подсказки */
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, Arial, sans-serif;
+    background: radial-gradient(circle, var(--shadow-color), #000);
+    color: var(--text-color);
+    display: grid;
+    place-items: center;
+}
+
+.container {
+    width: 90%;
+    max-width: 90%;
+    height: auto;
+    margin: 0 auto;
+    padding: 2%;
+    display: flex;
+    background-color: var(--bg-dark);
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--shadow-color);
+    position: relative;
+    overflow: visible;
+}
+
+.column {
+    flex: 1;
+    padding: 2rem;
+}
+
+.avatar {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 20px;
+    border: 1px solid var(--primary-color);
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 10px var(--primary-color));
+    box-shadow: 0 0 15px var(--primary-color);
+}
+
+.name {
+    font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: 0 0 5px var(--primary-color);
+}
+
+.accordion-item {
+    margin: 10px 0;
+    background-color: var(--accent-bg);
+    border-radius: 10px;
+    box-shadow: 0 0 3px var(--primary-color);
+    position: relative;
+}
+
+.accordion-header {
+    padding: 15px 25px;
+    font-size: clamp(1rem, 1.5vw, 1.375rem);
+    background-color: var(--header-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    border-radius: 10px;
+    box-shadow: 0 0 5px var(--shadow-color);
+}
+
+.accordion-header:hover {
+    background-color: var(--hover-bg);
+}
+
+.accordion-content {
+    position: absolute;
+    z-index: 100;
+    width: calc(100% - 40px);
+    max-height: 0;
+    margin: 3px 0;
+    padding: 0 20px;
+    font-size: 1.2em;
+    background-color: var(--accent-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+}
+
+.social-icons a {
+    position: relative;
+    width: 60px;
+}
+
+.social-icons img {
+    max-width: 60px;
+    max-height: 60px;
+    margin: -5px 0;
+}
+
+.tooltip {
+    visibility: hidden;
+    position: relative;
+    z-index: 1;
+    background-color: var(--tooltip-bg);
+    color: #fff;
+    text-align: center;
+    padding: 5px;
+    border-radius: 5px;
+    left: 40%;
+    margin-left: -50px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.social-icons a:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+    
+    .column {
+        padding: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .column:first-child { order: 1; }
+    .column:last-child { order: 2; }
+
+    .accordion-content {
+        width: auto;
+        max-width: 100%;
+    }
+}

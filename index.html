@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>alexeykasp about me</title>
+        <link rel="stylesheet" href="styles.css">
+        <script src="images.js" defer></script>
+        <script src="music.js" defer></script>
+        <script>
+            function adjustLayout() {
+                const body = document.body;
+                const html = document.documentElement;
+    
+                const height = Math.max(body.scrollHeight, body.offsetHeight, 
+                                        html.clientHeight, html.scrollHeight, html.offsetHeight);
+    
+                if (height > window.innerHeight) {
+                    document.body.style.minHeight = height + 'px';
+                }
+            }
+    
+            window.addEventListener('load', adjustLayout);
+            window.addEventListener('resize', adjustLayout);
+        </script>
+    </head>
+<body>
+    <div class="container">
+        <div class="column">
+            <img class="avatar" id="avatar" alt="Avatar">
+            <div class="name">alexeykasp</div>
+            <h1>Обо мне</h1>
+            <p>Здесь ты можешь найти информацию обо мне и мои Соц.сети.</p>
+            <p>Нажми на меню рядом, чтобы узнать больше.</p>
+        </div>
+        <div class="column">
+            <div class="accordion-item">
+                <div class="accordion-header">О себе</div>
+                <div class="accordion-content">
+                    <p>Умею пользоваться ChatGPT</p>
+                    <p>Много свободного времени на данный момент</p>
+                    <p>Быстро адаптируюсь</p>
+                    <p>Перфекционист</p>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-header">Что люблю и что нравиться</div>
+                <div class="accordion-content">
+                    <p>Изучать программирование</p>
+                    <p>Автоматизировать и оптимизировать задачи</p>
+                    <p>Начинать интересные идеи и забрасывать навсегда</p>
+                    <p>Математику</p>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-header">Соц.сети</div>
+                <div class="accordion-content">
+                    <div class="social-icons">
+                        <a href="https://t.me/alexeykasp" target="_blank">
+                            <img id="Telegram" alt="Telegram">
+                            <div class="tooltip">Telegram</div>
+                        </a>
+                        <a href="https://namemc.com/alexeykasp" target="_blank">
+                            <img id="NameMC" alt="NameMC">
+                            <div class="tooltip">NameMC</div>
+                        </a>
+                        <a href="https://guns.lol/frst" target="_blank">
+                            <img id="Guns.lol" alt="Guns.lol">
+                            <div class="tooltip">Guns.lol</div>
+                        </a>
+                        <a href="https://steamcommunity.com/id/alexeykasp" target="_blank">
+                            <img id="Steam" alt="Steam">
+                            <div class="tooltip">Steam</div>
+                        </a>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="accordion.js"></script>
+</body>
+</html>
