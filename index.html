@@ -64,6 +64,7 @@
                     <div id="ip-address"></div>
                     <div id="country-code"></div>
                     <div id="time-zone"></div>
+                    <div id="city"></div>
             
                     <!-- Общий скрипт для запроса данных -->
                     <script>
@@ -79,15 +80,19 @@
             
                             // Скрипт 2: Обработка часового пояса
                             if(data?.timezone) {
-                                const timezoneParts = data.timezone.split('/');
                                 document.getElementById('time-zone').textContent = 
-                                    `Часовой пояс: ${timezoneParts[timezoneParts.length - 1]}`;
+                                    `Часовой пояс: ${data.timezone}`;
                             }
             
                             // Обработка IP
                             if(data?.ip) {
                                 document.getElementById('ip-address').textContent = 
                                     `IP: ${data.ip}`;
+                            }
+                            // Обработка города
+                            if(data?.city) {
+                                document.getElementById('city').textContent =
+                                    `Город: ${data.city}`;
                             }
                         }
                     </script>
