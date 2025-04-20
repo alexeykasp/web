@@ -6,7 +6,6 @@
         <title>alexeykasp about me</title>
         <link rel="stylesheet" href="styles.css">
         <script src="images.js" defer></script>
-        <script src="music.js" defer></script>
         <script>
             function adjustLayout() {
                 const body = document.body;
@@ -56,6 +55,38 @@
                         </a>
                         </a>
                     </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <div class="accordion-header">ip</div>
+                <div class="accordion-content" id="ip-content"> 
+                    <script>
+                        // Функция для обработки ответа
+                        function handleIPResponse(data) {
+                            const ipContainer = document.getElementById('ip-content');
+                            if(data && data.ip) {
+                                ipContainer.innerHTML = 'Ваш IP: ' + data.ip + ' (api by myip.com)';
+                            } else {
+                                ipContainer.innerHTML = 'Некорректный ответ API';
+                            }
+                        }
+            
+                        // Создаем тег script для JSONP запроса
+                        const script = document.createElement('script');
+                        script.src = 'https://ipinfo.io/json?callback=handleIPResponse';
+                        document.body.appendChild(script);
+            
+                        // Таймаут на случай ошибки
+                        const timeoutId = setTimeout(() => {
+                            const ipContainer = document.getElementById('ip-content');
+                            if(ipContainer.innerHTML.trim() === '') {
+                                ipContainer.innerHTML = 'Не удалось получить IP';
+                            }
+                        }, 3000);
+            
+                        // Очистка таймаута при успешном ответе
+                        script.onload = () => clearTimeout(timeoutId);
+                    </script>
                 </div>
             </div>
         </div>
