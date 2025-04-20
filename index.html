@@ -59,33 +59,56 @@
             </div>
             <div class="accordion-item">
                 <div class="accordion-header">ip</div>
-                <div class="accordion-content" id="ip-content"> 
+                <div class="accordion-content"> 
+                    <!-- Контейнеры для данных -->
+                    <div id="ip-address"></div>
+                    <div id="country-code"></div>
+                    <div id="time-zone"></div>
+            
+                    <!-- Общий скрипт для запроса данных -->
                     <script>
-                        // Функция для обработки ответа
                         function handleIPResponse(data) {
-                            const ipContainer = document.getElementById('ip-content');
-                            if(data && data.ip) {
-                                ipContainer.innerHTML = 'Ваш IP: ' + data.ip + ' (api by ipinfo.io)';
-                            } else {
-                                ipContainer.innerHTML = 'Некорректный ответ API';
+                            // Очищаем таймер при успешном ответе
+                            clearTimeout(ipRequestTimeout);
+                            
+                            // Скрипт 1: Обработка страны
+                            if(data?.country) {
+                                document.getElementById('country-code').textContent = 
+                                    `Страна: ${data.country}`;
+                            }
+            
+                            // Скрипт 2: Обработка часового пояса
+                            if(data?.timezone) {
+                                const timezoneParts = data.timezone.split('/');
+                                document.getElementById('time-zone').textContent = 
+                                    `Часовой пояс: ${timezoneParts[timezoneParts.length - 1]}`;
+                            }
+            
+                            // Обработка IP
+                            if(data?.ip) {
+                                document.getElementById('ip-address').textContent = 
+                                    `IP: ${data.ip}`;
                             }
                         }
+                    </script>
             
-                        // Создаем тег script для JSONP запроса
+                    <!-- Скрипт инициализации запроса -->
+                    <script>
+                        let ipRequestTimeout;
+                        
                         const script = document.createElement('script');
                         script.src = 'https://ipinfo.io/json?callback=handleIPResponse';
                         document.body.appendChild(script);
             
-                        // Таймаут на случай ошибки
-                        const timeoutId = setTimeout(() => {
-                            const ipContainer = document.getElementById('ip-content');
-                            if(ipContainer.innerHTML.trim() === '') {
-                                ipContainer.innerHTML = 'Не удалось получить IP';
-                            }
+                        // Таймаут для обработки ошибок
+                        ipRequestTimeout = setTimeout(() => {
+                            const containers = document.querySelectorAll('#ip-address, #country-code, #time-zone');
+                            containers.forEach(container => {
+                                if(container.innerHTML.trim() === '') {
+                                    container.textContent = 'Данные недоступны';
+                                }
+                            });
                         }, 3000);
-            
-                        // Очистка таймаута при успешном ответе
-                        script.onload = () => clearTimeout(timeoutId);
                     </script>
                 </div>
             </div>
