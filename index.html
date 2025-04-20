@@ -65,7 +65,7 @@
                         function handleIPResponse(data) {
                             const ipContainer = document.getElementById('ip-content');
                             if(data && data.ip) {
-                                ipContainer.innerHTML = 'Ваш IP: ' + data.ip + ' (api by myip.com)';
+                                ipContainer.innerHTML = 'Ваш IP: ' + data.ip + ' (api by ipinfo.io)';
                             } else {
                                 ipContainer.innerHTML = 'Некорректный ответ API';
                             }
