@@ -246,7 +246,7 @@ function MainContent() {
               <ul className="list-disc list-inside">
                 <li>Telegram-боты на Python</li>
                 <li>Скрипты для YouTube-чата</li>
-                <li>Автоматизация рутины (key sender, auto downloader)</li>
+                <li>Автоматизация рутины</li>
                 <li>Веб-приложения на React</li>
               </ul>
             </CardContent>
