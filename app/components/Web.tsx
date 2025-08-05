@@ -10,31 +10,31 @@ const contacts = [
     name: "GitHub",
     href: "https://github.com/alexeykasp",
     icon: <Github size={18} />,
-    text: "GitHub",
+    text: "Github",
   },
   {
     name: "Telegram",
     href: "https://t.me/alexeykasp",
     icon: <FaTelegram size={18} />,
-    text: "@alexeykasp",
+    text: "Telegram",
   },
   {
     name: "NameMC",
     href: "https://namemc.com/profile/alexeykasp",
     icon: <SiNamemc size={18} />,
-    text: "alexeykasp",
+    text: "NameMC",
   },
   {
     name: "Steam",
     href: "https://steamcommunity.com/id/alexeykasp",
     icon: <FaSteam size={18} />,
-    text: "alexeykasp",
+    text: "Steam",
   },
   {
     name: "Twitch",
     href: "https://twitch.tv/alexeykasp",
     icon: <FaTwitch size={18} />,
-    text: "alexeykasp",
+    text: "Twitch",
   },
 ];
 
