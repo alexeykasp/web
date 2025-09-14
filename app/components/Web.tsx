@@ -106,7 +106,6 @@ function MainContent() {
               <h2 className="text-xl font-semibold mb-2">Навыки</h2>
               <ul className="list-disc list-inside">
                 <li>Python (скрипты, автоматизация)</li>
-                <li></li>
               </ul>
             </CardContent>
           </Card>
