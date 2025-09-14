@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Github } from "lucide-react";
-import { FaTelegram, FaSteam, FaTwitch, FaGithub } from "react-icons/fa";
+import { FaTelegram, FaSteam, FaTwitch, FaGithub, FaLastfm } from "react-icons/fa";
 import { SiNamemc } from "react-icons/si";
 import Image from "next/image";
 
@@ -90,6 +89,17 @@ function MainContent() {
           >
             <span className="contact-icon"><FaTwitch size={24} /></span>
             <span className="contact-text">Twitch</span>
+          </a>
+
+          <a
+            href="https://last.fm/alexeykasp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contact-button"
+            title="Last.FM"
+          >
+            <span className="contact-icon"><FaLastfm size={24}/></span>
+            <span className="contact-text">LastFM</span>
           </a>
         </div>
 
