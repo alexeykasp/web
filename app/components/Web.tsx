@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Github } from "lucide-react";
-import { FaTelegram, FaSteam, FaTwitch } from "react-icons/fa";
+import { FaTelegram, FaSteam, FaTwitch, FaGithub } from "react-icons/fa";
 import { SiNamemc } from "react-icons/si";
 import Image from "next/image";
 
@@ -9,7 +9,7 @@ const contacts = [
   {
     name: "GitHub",
     href: "https://github.com/alexeykasp",
-    icon: <Github size={18} />,
+    icon: <FaGithub size={18} />,
     text: "Github",
   },
   {
@@ -65,7 +65,7 @@ function MainContent() {
           style={{ color: "var(--text-color)" }}
         >
           Я увлекаюсь программированием, автоматизацией, созданием скриптов и
-          изучением технологий. Добро пожаловать на мою визитку!
+          изучением технологий.
         </p>
 
         {/* Контакты */}
@@ -87,35 +87,26 @@ function MainContent() {
 
         {/* Навыки и проекты */}
         <section
-          className="max-w-4xl w-full grid grid-cols-1 sm:grid-cols-2 gap-6 text-left"
+          className="max-w-lg w-full gap-6 text-center"
           style={{ color: "var(--text-color)" }}
         >
           <Card
-            className="bg-[var(--accent-bg)] border border-[var(--header-bg)] shadow-[0_0_10px_var(--shadow-color)]"
-            style={{ color: "var(--primary-color)" }}
+            className="
+            bg-[var(--accent-bg)]
+            border border-[var(--header-bg)]
+            shadow-[0_0_10px_var(--shadow-color)]
+            transform
+            transition-[transform, shadow] duration-300
+            hover:scale-110
+            hover:shadow-[0_0_20px_var(--shadow-color)]
+            "
+            style={{ color: "var(--primary-color)"}}
           >
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-2">Навыки</h2>
               <ul className="list-disc list-inside">
+                <li>Использование ИИ</li>
                 <li>Python (скрипты, автоматизация)</li>
-                <li>JavaScript / TypeScript</li>
-                <li>React, Next.js</li>
-                <li>Работа с API, web scraping</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card
-            className="bg-[var(--accent-bg)] border border-[var(--header-bg)] shadow-[0_0_10px_var(--shadow-color)]"
-            style={{ color: "var(--primary-color)" }}
-          >
-            <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-2">Проекты</h2>
-              <ul className="list-disc list-inside">
-                <li>Telegram-боты на Python</li>
-                <li>Скрипты для YouTube-чата</li>
-                <li>Автоматизация рутины</li>
-                <li>Веб-приложения на React</li>
               </ul>
             </CardContent>
           </Card>
