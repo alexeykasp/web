@@ -1,7 +1,33 @@
-<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="64" height="64" fill="#110000"/>
-  <polygon points="32,6 54,18 54,46 32,58 10,46 10,18" stroke="#ff4444" stroke-width="3" fill="none"/>
-  <text x="32" y="38" text-anchor="middle" font-family="Segoe UI, sans-serif" font-weight="bold" font-size="22" fill="#ff4444" letter-spacing="2">
-    AK
-  </text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <!-- Градиент -->
+    <linearGradient id="sym1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#EF4444"/>
+      <stop offset="50%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+
+    <!-- Неоновое свечение -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Рамка -->
+  <rect x="5" y="5" width="90" height="90" rx="12" ry="12"
+        fill="none" stroke="url(#sym1)" stroke-width="3"/>
+
+  <!-- Текст по центру, тоньше и с неоном -->
+  <text x="50" y="50"
+        text-anchor="middle"
+        dominant-baseline="middle"
+        font-family="monospace"
+        font-weight="600"
+        font-size="48"
+        fill="url(#sym1)"
+        filter="url(#glow)">{/}</text>
 </svg>
