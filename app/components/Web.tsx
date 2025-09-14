@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { FaTelegram, FaSteam, FaTwitch, FaGithub, FaLastfm } from "react-icons/fa";
+import { FaTelegram, FaSteam, FaTwitch, FaGithub, FaLastfm, FaSpotify } from "react-icons/fa";
 import { SiNamemc } from "react-icons/si";
 import Image from "next/image";
 
@@ -100,6 +100,17 @@ function MainContent() {
           >
             <span className="contact-icon"><FaLastfm size={24}/></span>
             <span className="contact-text">LastFM</span>
+          </a>
+
+                    <a
+            href="open.spotify.com/user/31xdx6itbquf5bsnsr2mrrimhoiq"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contact-button"
+            title="Spotify"
+          >
+            <span className="contact-icon"><FaSpotify size={24}/></span>
+            <span className="contact-text">Spotify</span>
           </a>
         </div>
 
