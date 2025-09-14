@@ -148,7 +148,7 @@ body,html,#__next {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 .contact-button {
-    height: 36px;
+    height: 42px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -158,20 +158,22 @@ body,html,#__next {
     cursor: pointer;
     overflow: hidden;
     white-space: nowrap;
-    max-width: 36px;
+    max-width: 42px;
     padding-left: 8px;
     padding-right: 8px;
     transition:
-        max-width 0.35s ease,
-        padding 0.35s ease,
-        background-color 0.25s ease,
-        color 0.25s ease;
+        max-width 0.75s ease,
+        padding 0.5s ease,
+        background-color 0.50s ease,
+        color 0.50s ease;
     text-decoration: none;
     user-select: none;
     border: none;
     outline: none;
+    z-index:1;
 }
 .contact-button:hover {
+    z-index: 2;
     max-width: 160px;
     background-color: var(--hover-bg);
     color: #fff;

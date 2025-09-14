@@ -5,39 +5,6 @@ import { FaTelegram, FaSteam, FaTwitch, FaGithub } from "react-icons/fa";
 import { SiNamemc } from "react-icons/si";
 import Image from "next/image";
 
-const contacts = [
-  {
-    name: "GitHub",
-    href: "https://github.com/alexeykasp",
-    icon: <FaGithub size={18} />,
-    text: "Github",
-  },
-  {
-    name: "Telegram",
-    href: "https://t.me/alexeykasp",
-    icon: <FaTelegram size={18} />,
-    text: "Telegram",
-  },
-  {
-    name: "NameMC",
-    href: "https://namemc.com/profile/alexeykasp",
-    icon: <SiNamemc size={18} />,
-    text: "NameMC",
-  },
-  {
-    name: "Steam",
-    href: "https://steamcommunity.com/id/alexeykasp",
-    icon: <FaSteam size={18} />,
-    text: "Steam",
-  },
-  {
-    name: "Twitch",
-    href: "https://twitch.tv/alexeykasp",
-    icon: <FaTwitch size={18} />,
-    text: "Twitch",
-  },
-];
-
 export default function Web() {
   return (
       <MainContent />
@@ -69,21 +36,63 @@ function MainContent() {
         </p>
 
         {/* Контакты */}
-        <div className="flex justify-center gap-4 flex-wrap mb-16">
-          {contacts.map(({ name, href, icon, text }) => (
-            <a
-              key={name}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="contact-button"
-              title={text}
-            >
-              <span className="contact-icon">{icon}</span>
-              <span className="contact-text">{text}</span>
-            </a>
-          ))}
+        <div className="flex gap-4 justify-center mb-16">
+          <a
+            href="https://github.com/alexeykasp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contact-button"
+            title="Github"
+          >
+            <span className="contact-icon"><FaGithub size={24} /></span>
+            <span className="contact-text">Github</span>
+          </a>
+
+          <a
+            href="https://t.me/alexeykasp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contact-button"
+            title="Telegram"
+          >
+            <span className="contact-icon"><FaTelegram size={24} /></span>
+            <span className="contact-text">Telegram</span>
+          </a>
+
+          <a
+            href="https://namemc.com/profile/alexeykasp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contact-button"
+            title="NameMC"
+          >
+            <span className="contact-icon"><SiNamemc size={24} /></span>
+            <span className="contact-text">NameMC</span>
+          </a>
+
+          <a
+            href="https://steamcommunity.com/id/alexeykasp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contact-button"
+            title="Steam"
+          >
+            <span className="contact-icon"><FaSteam size={24} /></span>
+            <span className="contact-text">Steam</span>
+          </a>
+
+          <a
+            href="https://twitch.tv/alexeykasp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contact-button"
+            title="Twitch"
+          >
+            <span className="contact-icon"><FaTwitch size={24} /></span>
+            <span className="contact-text">Twitch</span>
+          </a>
         </div>
+
 
         {/* Навыки и проекты */}
         <section
