@@ -92,7 +92,7 @@ function MainContent() {
           </a>
 
           <a
-            href="https://last.fm/alexeykasp"
+            href="https://last.fm/user/alexeykasp"
             target="_blank"
             rel="noopener noreferrer"
             className="contact-button"
