@@ -105,8 +105,8 @@ function MainContent() {
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-2">Навыки</h2>
               <ul className="list-disc list-inside">
-                <li>Использование ИИ</li>
                 <li>Python (скрипты, автоматизация)</li>
+                <li></li>
               </ul>
             </CardContent>
           </Card>
