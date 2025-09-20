@@ -16,8 +16,8 @@ function MainContent() {
 
       <main className="min-h-screen p-6 flex flex-col items-center">
         {/* Аватарка */}
-        <div className="mb-8 rounded-full overflow-hidden w-24 h-24 shadow-lg shadow-[var(--shadow-color)]">
-          <Image src={"/avatar.png"} alt="Avatar" width={96} height={96} priority />
+        <div className="mb-8 rounded-full overflow-hidden w-36 h-36 shadow-lg">
+          <Image src={"/avatar.png"} alt="Avatar" width={144} height={144} priority />
         </div>
 
         <h1
@@ -45,7 +45,10 @@ function MainContent() {
           <a
             href="https://github.com/alexeykasp"
             target="_blank"
-            rel="noopener noreferrer"
+            rel="
+            noopener 
+            noreferrer
+            "
             className="contact-button"
             title="Github"
           >
@@ -56,7 +59,10 @@ function MainContent() {
           <a
             href="https://t.me/alexeykasp"
             target="_blank"
-            rel="noopener noreferrer"
+            rel="
+            noopener 
+            noreferrer
+            "
             className="contact-button"
             title="Telegram"
           >
@@ -67,7 +73,10 @@ function MainContent() {
           <a
             href="https://namemc.com/profile/alexeykasp"
             target="_blank"
-            rel="noopener noreferrer"
+            rel="
+            noopener 
+            noreferrer
+            "
             className="contact-button"
             title="NameMC"
           >
@@ -78,7 +87,10 @@ function MainContent() {
           <a
             href="https://steamcommunity.com/id/alexeykasp"
             target="_blank"
-            rel="noopener noreferrer"
+            rel="
+            noopener 
+            noreferrer
+            "
             className="contact-button"
             title="Steam"
           >
@@ -89,7 +101,10 @@ function MainContent() {
           <a
             href="https://twitch.tv/alexeykasp"
             target="_blank"
-            rel="noopener noreferrer"
+            rel="
+            noopener 
+            noreferrer
+            "
             className="contact-button"
             title="Twitch"
           >
@@ -100,7 +115,10 @@ function MainContent() {
           <a
             href="https://last.fm/user/alexeykasp"
             target="_blank"
-            rel="noopener noreferrer"
+            rel="
+            noopener 
+            noreferrer
+            "
             className="contact-button"
             title="Last.FM"
           >
@@ -111,7 +129,10 @@ function MainContent() {
                     <a
             href="open.spotify.com/user/31xdx6itbquf5bsnsr2mrrimhoiq"
             target="_blank"
-            rel="noopener noreferrer"
+            rel="
+            noopener 
+            noreferrer
+            "
             className="contact-button"
             title="Spotify"
           >
@@ -123,9 +144,13 @@ function MainContent() {
 
         {/* Навыки и проекты */}
         <section
-          className="max-w-lg w-full gap-6 text-center"
-          style={{ color: "var(--text-color)" }}
-        >
+          className="
+          max-w-lg 
+          w-full 
+          gap-6 
+          text-center"
+          style={{ color: "var(--text-color)" }}>
+
           <Card
             className="
             bg-[var(--accent-bg)]
