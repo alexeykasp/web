@@ -126,19 +126,9 @@
     --text-color: #54105a;
     --header-bg: #3a0000;
     --accent-bg: #1a0000;
-    --hover-bg: #4a0000;
+    --hover-bg: #2e0000;
     --shadow-color: #ff0000;
     --tooltip-bg: #2a0000;
-}
-.dark {
-    --primary-color: #ff4c4c;
-    --bg-dark: #140000;
-    --text-color: #d99cfc;
-    --header-bg: #5b0000;
-    --accent-bg: #2a0000;
-    --hover-bg: #7a0000;
-    --shadow-color: #ff0000;
-    --tooltip-bg: #3a0000;
 }
 body,html,#__next {
     height: 100%;
@@ -170,10 +160,17 @@ body,html,#__next {
     user-select: none;
     border: none;
     outline: none;
-    z-index:1;
+}
+@media (max-width: 767px) {
+  .contact-button {
+    max-width: 160px;
+    background-color: var(--hover-bg);
+    color: #faa3a3;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
 }
 .contact-button:hover {
-    z-index: 2;
     max-width: 160px;
     background-color: var(--hover-bg);
     color: #fff;
@@ -190,6 +187,11 @@ body,html,#__next {
     font-weight: 500;
     font-size: 0.875rem; /* 14px */
     color: inherit;
+}
+@media (max-width : 767px) {
+  .contact-text {
+    opacity: 1;
+  }
 }
 .contact-button:hover .contact-text {
     opacity: 1;

@@ -35,7 +35,13 @@ function MainContent() {
         </p>
 
         {/* Контакты */}
-        <div className="flex gap-4 justify-center mb-16">
+        <div className="
+        grid
+        lg:flex
+        gap-4
+        justify-center
+        mb-16
+        ">
           <a
             href="https://github.com/alexeykasp"
             target="_blank"
