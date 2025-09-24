@@ -1,0 +1,155 @@
+# Разрешаем доступ к самому robots.txt
+User-agent: *
+Allow: /robots.txt
+
+# Блокируем конкретных ботов для всего остального сайта
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: "Anchor Browser"
+Disallow: /
+
+User-agent: Applebot
+Disallow: /
+
+User-agent: archive.org_bot
+Disallow: /
+
+User-agent: bingbot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Claude-SearchBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: DuckAssistBot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Google-CloudVertexBot
+Disallow: /
+
+User-agent: Googlebot
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: meta-externalfetcher
+Disallow: /
+
+User-agent: MistralAI-User
+Disallow: /
+
+User-agent: Novellum
+Disallow: /
+
+User-agent: OAI-SearchBot
+Disallow: /
+
+User-agent: Perplexity-User
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: ProRataInc
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
+
+# Блокируем только роботов Яндекса
+User-agent: YandexBot
+Disallow: /
+
+User-agent: YandexImages
+Disallow: /
+
+User-agent: YandexMedia
+Disallow: /
+
+User-agent: YandexVideo
+Disallow: /
+
+User-agent: YandexWebmaster
+Disallow: /
+
+User-agent: YandexMetrika
+Disallow: /
+
+User-agent: YandexMobileBot
+Disallow: /
+
+User-agent: YandexAccessibilityBot
+Disallow: /
+
+User-agent: YandexDirect
+Disallow: /
+
+User-agent: YaDirectFetcher
+Disallow: /
+
+User-agent: YandexFavicons
+Disallow: /
+
+User-agent: YandexMarket
+Disallow: /
+
+User-agent: YandexNews
+Disallow: /
+
+User-agent: YandexSitelinks
+Disallow: /
+
+User-agent: YandexSpravBot
+Disallow: /
+
+User-agent: YandexTracker
+Disallow: /
+
+User-agent: YandexUserproxy
+Disallow: /
+
+User-agent: YandexVerticals
+Disallow: /
+
+User-agent: YandexVertis
+Disallow: /
+
+User-agent: YandexPagechecker
+Disallow: /
+
+User-agent: YandexRenderResourcesBot
+Disallow: /
+
+User-agent: YandexSearchShop
+Disallow: /
+
+User-agent: YandexComBot
+Disallow: /
+
+User-agent: YandexScreenshotBot
+Disallow: /
+
+User-agent: YandexOntoDB
+Disallow: /
+
+User-agent: YandexOntoDBAPI
+Disallow: /

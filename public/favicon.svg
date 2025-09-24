@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <!-- Градиент с переливом -->
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444">
+        <animate attributeName="stop-color" values="#EF4444;#8B5CF6;#3B82F6;#EF4444" dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%" stop-color="#8B5CF6">
+        <animate attributeName="stop-color" values="#8B5CF6;#3B82F6;#EF4444;#8B5CF6" dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#3B82F6">
+        <animate attributeName="stop-color" values="#3B82F6;#EF4444;#8B5CF6;#3B82F6" dur="4s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Неоновое свечение -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Рамка -->
+  <rect x="5" y="5" width="90" height="90" rx="12" ry="12"
+        fill="none" stroke="url(#grad2)" stroke-width="3" filter="url(#glow)"/>
+
+  <!-- Центральный символ -->
+  <text x="50" y="50" text-anchor="middle" dominant-baseline="middle"
+        font-family="monospace" font-weight="600" font-size="48"
+        fill="url(#grad2)" filter="url(#glow)">
+    {/}
+  </text>
+
+  <!-- Две искры, движущиеся по окружности -->
+  <g>
+    <!-- Верхняя искра, ближе к центру -->
+    <circle cx="50" cy="10" r="2" fill="url(#grad2)" filter="url(#glow)">
+      <animateTransform attributeName="transform" type="rotate"
+                        from="0 50 50" to="360 50 50" dur="5s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Нижняя искра, между центром и рамкой -->
+    <circle cx="50" cy="10" r="2" fill="url(#grad2)" filter="url(#glow)">
+      <animateTransform attributeName="transform" type="rotate"
+                        from="180 50 50" to="540 50 50" dur="5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>
