@@ -37,7 +37,7 @@ function MainContent() {
         {/* Контакты */}
         <div className="
         grid
-        lg:flex
+        md:flex
         gap-4
         justify-center
         mb-16
