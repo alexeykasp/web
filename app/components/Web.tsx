@@ -13,6 +13,17 @@ export default function Web() {
 function MainContent() {
   return (
     <>
+      <div className="fixed top-0 right-0 m-4 shadow-lg">
+        <a
+          href="https://github.com/alexeykasp/web"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "var(--primary-color)" }}
+        >
+          <FaGithub size={28} />
+        </a>
+      </div>
+
 
       <main className="min-h-screen p-6 flex flex-col items-center">
         {/* Аватарка */}
