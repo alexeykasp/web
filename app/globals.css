@@ -154,7 +154,6 @@ body,html,#__next {
         padding 0.5s ease,
         background-color 0.50s ease,
         color 0.50s ease,
-        sacle 0.50s ease,
         transform 0.50s ease;
     text-decoration: none;
     user-select: none;
@@ -176,8 +175,7 @@ body,html,#__next {
     color: #fff;
     padding-left: 12px;
     padding-right: 12px;
-    transform: translateY(-5px);
-    scale: 105%;
+    transform: translateY(-3px);
 }
 .contact-icon {
     flex-shrink: 0;
