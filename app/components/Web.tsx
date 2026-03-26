@@ -11,9 +11,19 @@ export default function Web() {
 }
 
 function MainContent() {
+  const contacts = [
+    { href: "https://github.com/alexeykasp", title: "Github", Icon: FaGithub },
+    { href: "https://t.me/alexeykasp", title: "Telegram", Icon: FaTelegram },
+    { href: "https://namemc.com/profile/alexeykasp", title: "NameMC", Icon: SiNamemc },
+    { href: "https://steamcommunity.com/id/alexeykasp", title: "Steam", Icon: FaSteam },
+    { href: "https://twitch.tv/alexeykasp", title: "Twitch", Icon: FaTwitch },
+    { href: "https://last.fm/user/alexeykasp", title: "LastFM", Icon: FaLastfm },
+    { href: "https://open.spotify.com/user/31xdx6itbquf5bsnsr2mrrimhoiq", title: "Spotify", Icon: FaSpotify },
+  ];
+
   return (
     <>
-      <div className="fixed top-0 right-0 m-4 shadow-lg">
+      <div className="fixed top-0 right-0 m-4 shadow-lg animate-entry">
         <a
           href="https://github.com/alexeykasp/web"
           target="_blank"
@@ -25,20 +35,20 @@ function MainContent() {
       </div>
 
 
-      <main className="min-h-screen p-6 flex flex-col items-center">
+      <main className="min-h-screen p-6 flex flex-col items-center animate-entry">
         {/* Аватарка */}
-        <div className="mb-8 rounded-full overflow-hidden w-36 h-36 shadow-lg">
+        <div className="mb-8 rounded-full overflow-hidden w-36 h-36 shadow-lg animate-avatar">
           <Image src={"/avatar.png"} alt="Avatar" width={144} height={144} priority />
         </div>
 
         <h1
-          className="text-4xl font-bold mb-2"
+          className="text-4xl font-bold mb-2 animate-title"
           style={{ color: "var(--primary-color)" }}
         >
           Привет, я alexeykasp
         </h1>
         <p
-          className="text-lg mb-6 max-w-xl text-center"
+          className="text-lg mb-6 max-w-xl text-center animate-text"
           style={{ color: "var(--text-color)" }}
         >
           Я увлекаюсь программированием, автоматизацией, созданием скриптов и
@@ -46,120 +56,30 @@ function MainContent() {
         </p>
 
         {/* Контакты */}
-        <div className="
-        grid
-        md:flex
-        gap-4
-        justify-center
-        mb-16
-        ">
-          <a
-            href="https://github.com/alexeykasp"
-            target="_blank"
-            rel="
-            noopener 
-            noreferrer
-            "
-            className="contact-button"
-            title="Github"
-          >
-            <span className="contact-icon"><FaGithub size={24} /></span>
-            <span className="contact-text">Github</span>
-          </a>
-
-          <a
-            href="https://t.me/alexeykasp"
-            target="_blank"
-            rel="
-            noopener 
-            noreferrer
-            "
-            className="contact-button"
-            title="Telegram"
-          >
-            <span className="contact-icon"><FaTelegram size={24} /></span>
-            <span className="contact-text">Telegram</span>
-          </a>
-
-          <a
-            href="https://namemc.com/profile/alexeykasp"
-            target="_blank"
-            rel="
-            noopener 
-            noreferrer
-            "
-            className="contact-button"
-            title="NameMC"
-          >
-            <span className="contact-icon"><SiNamemc size={24} /></span>
-            <span className="contact-text">NameMC</span>
-          </a>
-
-          <a
-            href="https://steamcommunity.com/id/alexeykasp"
-            target="_blank"
-            rel="
-            noopener 
-            noreferrer
-            "
-            className="contact-button"
-            title="Steam"
-          >
-            <span className="contact-icon"><FaSteam size={24} /></span>
-            <span className="contact-text">Steam</span>
-          </a>
-
-          <a
-            href="https://twitch.tv/alexeykasp"
-            target="_blank"
-            rel="
-            noopener 
-            noreferrer
-            "
-            className="contact-button"
-            title="Twitch"
-          >
-            <span className="contact-icon"><FaTwitch size={24} /></span>
-            <span className="contact-text">Twitch</span>
-          </a>
-
-          <a
-            href="https://last.fm/user/alexeykasp"
-            target="_blank"
-            rel="
-            noopener 
-            noreferrer
-            "
-            className="contact-button"
-            title="Last.FM"
-          >
-            <span className="contact-icon"><FaLastfm size={24}/></span>
-            <span className="contact-text">LastFM</span>
-          </a>
-
-                    <a
-            href="https://open.spotify.com/user/31xdx6itbquf5bsnsr2mrrimhoiq"
-            target="_blank"
-            rel="
-            noopener 
-            noreferrer
-            "
-            className="contact-button"
-            title="Spotify"
-          >
-            <span className="contact-icon"><FaSpotify size={24}/></span>
-            <span className="contact-text">Spotify</span>
-          </a>
+        <div className="grid md:flex gap-4 justify-center mb-16">
+          {contacts.map((item, index) => {
+            const Icon = item.Icon;
+            return (
+              <a
+                key={item.title}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="contact-button animate-contact"
+                title={item.title}
+                style={{ animationDelay: `${index * 0.08 + 0.12}s` }}
+              >
+                <span className="contact-icon"><Icon size={24} /></span>
+                <span className="contact-text">{item.title}</span>
+              </a>
+            );
+          })}
         </div>
 
 
         {/* Навыки и проекты */}
         <section
-          className="
-          max-w-lg 
-          w-full 
-          gap-6 
-          text-center"
+          className="max-w-lg w-full gap-6 text-center animate-card"
           style={{ color: "var(--text-color)" }}>
 
           <Card
@@ -172,7 +92,7 @@ function MainContent() {
             hover:scale-110
             hover:shadow-[0_0_20px_var(--shadow-color)]
             "
-            style={{ color: "var(--primary-color)"}}
+            style={{ color: "var(--primary-color)", borderColor: "var(--header-bg)" }}
           >
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-2">Навыки</h2>
