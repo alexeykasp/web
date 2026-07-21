@@ -35,7 +35,7 @@ function MainContent() {
       </div>
 
 
-      <main className="min-h-screen p-6 flex flex-col items-center animate-entry">
+      <main className="flex-1 flex flex-col items-center justify-center animate-entry px-6 py-6">
         {/* Аватарка */}
         <div className="mb-8 rounded-full overflow-hidden w-36 h-36 shadow-lg animate-avatar">
           <Image src={"/avatar.png"} alt="Avatar" width={144} height={144} priority />
