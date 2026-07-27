@@ -125,101 +125,119 @@ body {
   color: var(--foreground);
 }
 :root {
-    --primary-color: #8b0101;
-    --bg-dark: #140000;
-    --text-color: #54105a;
-    --header-bg: #3a0000;
-    --accent-bg: #1a0000;
-    --hover-bg: #2e0000;
-    --shadow-color: #ff0000;
-    --tooltip-bg: #2a0000;
+    --primary-color: #d94a72;
+    --bg-dark: #0b0710;
+    --text-color: #a888c9;
+    --header-bg: #d94a72;
+    --accent-bg: #170f24;
+    --hover-bg: #221731;
+    --shadow-color: #d94a72;
+    --tooltip-bg: #1c1329;
+    --glow-cyan: #4dd9e6;
 }
 body,html,#__next {
     height: 100%;
     margin: 0;
-    background-color: var(--bg-dark);
+    background:
+        radial-gradient(circle at 15% 0%, rgba(217, 74, 114, 0.08), transparent 45%),
+        radial-gradient(circle at 85% 15%, rgba(77, 217, 230, 0.06), transparent 40%),
+        linear-gradient(180deg, var(--bg-dark) 0%, #0d0a14 60%, #08060d 100%);
+    background-attachment: fixed;
     color: var(--text-color);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    letter-spacing: 0.01em;
+}
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        linear-gradient(rgba(217, 74, 114, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(77, 217, 230, 0.02) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(circle at 50% 20%, black 0%, transparent 75%);
 }
 #__next {
     display: flex;
     flex-direction: column;
     min-height: 100%;
+    position: relative;
+    z-index: 1;
 }
 .contact-button {
     position: relative;
     height: 42px;
-    display: inline-flex;
+    display: inline-grid;
+    grid-template-columns: 24px 0fr;
     align-items: center;
-    gap: 8px;
-    border-radius: 6px;
+    justify-content: center;
+    column-gap: 0;
+    padding: 0 9px;
+    border-radius: 50%;
     background-color: var(--accent-bg);
     color: var(--primary-color);
     cursor: pointer;
-    overflow: hidden;
     white-space: nowrap;
-    width: 42px;
+    border: 1px solid rgba(217, 74, 114, 0.35);
+    box-shadow: 0 0 8px rgba(217, 74, 114, 0.35), 0 0 16px rgba(217, 74, 114, 0.15), inset 0 0 6px rgba(217, 74, 114, 0.08);
     transition:
-        width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        grid-template-columns 0.5s cubic-bezier(0.65, 0, 0.35, 1),
+        column-gap 0.5s cubic-bezier(0.65, 0, 0.35, 1),
+        border-radius 0.5s cubic-bezier(0.65, 0, 0.35, 1),
         background-color 0.35s ease,
         color 0.35s ease,
-        transform 0.35s ease;
+        transform 0.35s ease,
+        box-shadow 0.35s ease;
     text-decoration: none;
     user-select: none;
-    border: none;
     outline: none;
 }
 @media (max-width: 767px) {
   .contact-button {
-    max-width: 160px;
+    grid-template-columns: 24px 1fr;
+    column-gap: 8px;
+    border-radius: 21px;
     background-color: var(--hover-bg);
     color: #faa3a3;
-    padding-left: 12px;
-    padding-right: 12px;
   }
 }
 .contact-button:hover {
     background-color: var(--hover-bg);
     color: #fff;
     transform: translateY(-1px);
-    width: 112px;
-    max-width: 104px;
+    grid-template-columns: 24px 1fr;
+    column-gap: 8px;
+    border-radius: 10px;
+    box-shadow: 0 0 14px rgba(217, 74, 114, 0.55), 0 0 28px rgba(217, 74, 114, 0.25), 0 0 20px rgba(77, 217, 230, 0.2);
+    border-color: rgba(77, 217, 230, 0.5);
 }
 .contact-icon {
-    flex-shrink: 0;
-    margin-left: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 .contact-text {
     display: inline-block;
-    opacity: 0;
-    max-width: 0;
+    opacity: 1;
     overflow: hidden;
+    min-width: 0;
     white-space: nowrap;
     vertical-align: middle;
-    transition: opacity 0.4s ease, max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1), margin-left 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.5s cubic-bezier(0.65, 0, 0.35, 1);
     font-weight: 500;
     font-size: 0.875rem; /* 14px */
     color: inherit;
-    margin-left: 0;
 }
 .contact-button:hover .contact-text {
-    opacity: 1;
-    max-width: 140px;
-    margin-left: 6px;
-}
-
-.contact-button:hover .contact-icon {
-    margin-left: 0;
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.05s;
 }
 @media (max-width : 767px) {
-  .contact-button {
-    width: 112px;
-    max-width: 112px;
-  }
   .contact-text {
-    opacity: 1;
-    max-width: 90px;
-    margin-left: 6px;
+    clip-path: inset(0 0 0 0);
   }
 }
 
@@ -227,32 +245,32 @@ body,html,#__next {
 .animate-entry {
   opacity: 0;
   transform: scale(0.96) translateY(4px);
-  animation: entrySmooth 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: entrySmooth 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 .animate-avatar {
   opacity: 0;
   transform: scale(0.7);
-  animation: popInSoft 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: popInSoft 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.12s forwards;
 }
 .animate-title {
   opacity: 0;
   transform: translateY(-12px);
-  animation: fadeInUpSoft 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.08s forwards;
+  animation: fadeInUpSoft 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.32s forwards;
 }
 .animate-text {
   opacity: 0;
   transform: translateY(-10px);
-  animation: fadeInUpSoft 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.16s forwards;
+  animation: fadeInUpSoft 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.48s forwards;
 }
 .animate-contact {
   opacity: 0;
   transform: translateY(12px) scale(0.98);
-  animation: contactFloat 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: contactFloat 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .animate-card {
   opacity: 0;
   transform: translateY(14px);
-  animation: cardReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.36s forwards;
+  animation: cardReveal 0.55s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
 }
 
 @keyframes entrySmooth {
