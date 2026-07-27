@@ -1,7 +1,5 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { FaTelegram, FaSteam, FaTwitch, FaGithub, FaLastfm, FaSpotify } from "react-icons/fa";
-import { SiNamemc } from "react-icons/si";
 import Image from "next/image";
 
 export default function Web() {
@@ -12,38 +10,24 @@ export default function Web() {
 
 function MainContent() {
   const contacts = [
-    { href: "https://github.com/alexeykasp", title: "Github", Icon: FaGithub },
-    { href: "https://t.me/alexeykasp", title: "Telegram", Icon: FaTelegram },
-    { href: "https://namemc.com/profile/alexeykasp", title: "NameMC", Icon: SiNamemc },
-    { href: "https://steamcommunity.com/id/alexeykasp", title: "Steam", Icon: FaSteam },
-    { href: "https://twitch.tv/alexeykasp", title: "Twitch", Icon: FaTwitch },
-    { href: "https://last.fm/user/alexeykasp", title: "LastFM", Icon: FaLastfm },
-    { href: "https://open.spotify.com/user/31xdx6itbquf5bsnsr2mrrimhoiq", title: "Spotify", Icon: FaSpotify },
+    { href: "https://stats.fm/alexeykasp", title: "stats.fm", svgSrc: "/statsfm.svg", size: 20 },
+    { href: "https://github.com/alexeykasp", title: "Github", svgSrc: "/github.svg", size: 22 },
+    { href: "https://t.me/alexeykasp", title: "Telegram", svgSrc: "/telegram.svg", size: 16 },
+    { href: "https://steamcommunity.com/id/alexeykasp", title: "Steam", svgSrc: "/steam.svg", size: 24 },
+    { href: "https://open.spotify.com/user/31xdx6itbquf5bsnsr2mrrimhoiq", title: "Spotify", svgSrc: "/spotify.svg", size: 22 },
   ];
 
   return (
     <>
-      <div className="fixed top-0 right-0 m-4 shadow-lg animate-entry">
-        <a
-          href="https://github.com/alexeykasp/web"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "var(--primary-color)" }}
-        >
-          <FaGithub size={28} />
-        </a>
-      </div>
-
-
       <main className="flex-1 flex flex-col items-center justify-center animate-entry px-6 py-6">
         {/* Аватарка */}
-        <div className="mb-8 rounded-full overflow-hidden w-36 h-36 shadow-lg animate-avatar">
+        <div className="mb-8 rounded-full overflow-hidden w-36 h-36 shadow-lg animate-avatar" style={{ boxShadow: "0 0 12px rgba(217,74,114,0.25)", border: "2px solid rgba(217,74,114,0.25)" }}>
           <Image src={"/avatar.png"} alt="Avatar" width={144} height={144} priority />
         </div>
 
         <h1
           className="text-4xl font-bold mb-2 animate-title"
-          style={{ color: "var(--primary-color)" }}
+          style={{ color: "var(--primary-color)", textShadow: "0 0 8px rgba(217,74,114,0.35)" }}
         >
           Привет, я alexeykasp
         </h1>
@@ -58,7 +42,6 @@ function MainContent() {
         {/* Контакты */}
         <div className="grid md:flex gap-4 justify-center mb-16">
           {contacts.map((item, index) => {
-            const Icon = item.Icon;
             return (
               <a
                 key={item.title}
@@ -67,9 +50,11 @@ function MainContent() {
                 rel="noopener noreferrer"
                 className="contact-button animate-contact"
                 title={item.title}
-                style={{ animationDelay: `${index * 0.08 + 0.12}s` }}
+                style={{ animationDelay: `${index * 0.08 + 0.6}s` }}
               >
-                <span className="contact-icon"><Icon size={24} /></span>
+                <span className="contact-icon">
+                  <Image src={item.svgSrc} alt={item.title} width={item.size} height={item.size} />
+                </span>
                 <span className="contact-text">{item.title}</span>
               </a>
             );
