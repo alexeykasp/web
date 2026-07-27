@@ -7,7 +7,7 @@ export default function Page() {
       <Head>
         <meta name="yandex-verification" content="2b4f7678d9a7b236" />
       </Head>
-      <Web />;
+      <Web />
     </>
   );
 }
