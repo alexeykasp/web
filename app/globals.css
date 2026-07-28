@@ -194,6 +194,13 @@ body::before {
     user-select: none;
     outline: none;
 }
+/* увеличенная зона ховера — не схлопывается при уводе мыши */
+.contact-button::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: inherit;
+}
 @media (max-width: 767px) {
   .contact-button {
     grid-template-columns: 24px 1fr;
@@ -310,8 +317,8 @@ body::before {
   100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes contactFloat {
-  0% { opacity: 0; transform: translateY(12px) scale(0.98); }
-  70% { opacity: 1; transform: translateY(0px) scale(1); }
+  0% { opacity: 0; transform: translateY(12px) scale(0.92); }
+  65% { opacity: 1; transform: translateY(-2px) scale(1.04); }
   100% { opacity: 1; transform: translateY(0px) scale(1); }
 }
 @keyframes cardReveal {

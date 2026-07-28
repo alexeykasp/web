@@ -63,9 +63,14 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
       mousePosition.current = { x: e.clientX, y: e.clientY };
       if (!visible) setVisible(true);
     };
+    const mouseLeaveHandler = () => setVisible(false);
 
     document.addEventListener("mousemove", mouseMoveHandler);
-    return () => document.removeEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("mouseleave", mouseLeaveHandler);
+    return () => {
+      document.removeEventListener("mousemove", mouseMoveHandler);
+      document.removeEventListener("mouseleave", mouseLeaveHandler);
+    };
   }, [visible]);
 
   return (

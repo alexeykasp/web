@@ -73,8 +73,6 @@ function TiltContactButton({
   const [transform, setTransform] = useState(baseTransform);
   const [transformDuration, setTransformDuration] = useState("0.4s cubic-bezier(0.16,1,0.3,1)");
 
-  // Тот же список transition, что и у .contact-button в globals.css,
-  // чтобы inline-стиль не перебивал плавное раскрытие капсулы
   const baseTransitions =
     "grid-template-columns 0.5s cubic-bezier(0.65,0,0.35,1), " +
     "column-gap 0.5s cubic-bezier(0.65,0,0.35,1), " +
@@ -83,6 +81,7 @@ function TiltContactButton({
     "box-shadow 0.35s ease, border-color 0.35s ease";
 
   const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!entered) return;
     const el = ref.current;
     if (!el) return;
 
@@ -102,6 +101,7 @@ function TiltContactButton({
   };
 
   const handleMouseLeave = () => {
+    if (!entered) return;
     setTransform(baseTransform);
     setTransformDuration("0.4s cubic-bezier(0.16,1,0.3,1)");
   };
@@ -119,8 +119,12 @@ function TiltContactButton({
       onMouseLeave={handleMouseLeave}
       style={{
         animationDelay: `${index * 0.08 + 0.6}s`,
-        transform,
-        transition: `${baseTransitions}, transform ${transformDuration}`,
+        ...(entered ? {
+          transform,
+          transition: `${baseTransitions}, transform ${transformDuration}`,
+        } : {
+          transition: baseTransitions,
+        }),
       }}
     >
       <span className="contact-icon">
@@ -158,8 +162,9 @@ function MainContent() {
           className="text-lg mb-6 max-w-xl text-center animate-text"
           style={{ color: "var(--text-color)" }}
         >
-          Я увлекаюсь программированием, автоматизацией, созданием скриптов и
-          изучением технологий.
+          Я — нуб, который пытается разобраться. Пишу скрипты, автоматизирую
+          рутину и иногда даже что-то работает. Вечно учусь, иногда гуглю,
+          периодически коммичу в прод до дедлайна.
         </p>
 
         {/* Контакты */}
