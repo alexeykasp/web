@@ -11,6 +11,8 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
   const mousePosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trailPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trailSize = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const slidingOff = useRef(false);
+  const offscreenTarget = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const [active, setActive] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -18,16 +20,28 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
     let currentFrame: number;
 
     const move = () => {
-      if (trail.current) {
+      if (!trail.current) { currentFrame = requestAnimationFrame(move); return; }
+
+      if (slidingOff.current) {
+        trailPosition.current.x += (offscreenTarget.current.x - trailPosition.current.x) * 0.25;
+        trailPosition.current.y += (offscreenTarget.current.y - trailPosition.current.y) * 0.25;
+        trail.current.style.left = trailPosition.current.x + "px";
+        trail.current.style.top = trailPosition.current.y + "px";
+
+        const dx = trailPosition.current.x - offscreenTarget.current.x;
+        const dy = trailPosition.current.y - offscreenTarget.current.y;
+        if (dx * dx + dy * dy < 4) {
+          slidingOff.current = false;
+          setVisible(false);
+        }
+      } else {
         const hoveredElement = document.elementFromPoint(
-          mousePosition.current.x,
-          mousePosition.current.y
+          mousePosition.current.x, mousePosition.current.y
         );
         const computedStyle = hoveredElement ? getComputedStyle(hoveredElement) : null;
         const cursorStyle = computedStyle?.cursor || "default";
         const isInteractive = cursorStyle === "pointer";
 
-        // Позиция курсора (плавная интерполяция к реальной позиции мыши)
         trailPosition.current.x =
           trailPosition.current.x * smoothnessCoefficient +
           mousePosition.current.x * (1 - smoothnessCoefficient);
@@ -38,14 +52,11 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
         trail.current.style.left = trailPosition.current.x + "px";
         trail.current.style.top = trailPosition.current.y + "px";
 
-        // Размер курсора: растёт при наведении на интерактивные элементы
         const sizeTarget = isInteractive ? { width: 46, height: 46 } : { width: 14, height: 14 };
-
         trailSize.current.width =
           trailSize.current.width * smoothnessCoefficient + sizeTarget.width * (1 - smoothnessCoefficient);
         trailSize.current.height =
           trailSize.current.height * smoothnessCoefficient + sizeTarget.height * (1 - smoothnessCoefficient);
-
         trail.current.style.width = trailSize.current.width + "px";
         trail.current.style.height = trailSize.current.height + "px";
 
@@ -54,7 +65,6 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
       currentFrame = requestAnimationFrame(move);
     };
     currentFrame = requestAnimationFrame(move);
-
     return () => cancelAnimationFrame(currentFrame);
   }, [smoothnessCoefficient]);
 
@@ -64,7 +74,28 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
       if (!visible) setVisible(true);
     };
     const mouseLeaveHandler = (e: MouseEvent) => {
-      if (!e.relatedTarget) setVisible(false);
+      if (!e.relatedTarget) {
+        const { x, y } = mousePosition.current;
+        const threshold = 3;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        const atLeft = x <= threshold;
+        const atRight = x >= w - threshold;
+        const atTop = y <= threshold;
+        const atBottom = y >= h - threshold;
+
+        if (atLeft || atRight || atTop || atBottom) {
+          let tx = x, ty = y;
+          if (atLeft) tx = -60;
+          else if (atRight) tx = w + 60;
+          if (atTop) ty = -60;
+          else if (atBottom) ty = h + 60;
+          offscreenTarget.current = { x: tx, y: ty };
+          slidingOff.current = true;
+        } else {
+          setVisible(false);
+        }
+      }
     };
 
     document.addEventListener("mousemove", mouseMoveHandler);
