@@ -241,6 +241,27 @@ body::before {
   }
 }
 
+/* Кастомный курсор (вдохновилён по референсу exterasquad/exterawebsite) */
+@media (hover: hover) and (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}
+.custom-cursor-idle {
+  background-color: var(--primary-color);
+  box-shadow: 0 0 10px rgba(217, 74, 114, 0.6), 0 0 18px rgba(217, 74, 114, 0.3);
+}
+.custom-cursor-active {
+  background-color: transparent;
+  border: 1.5px solid var(--glow-cyan);
+  box-shadow: 0 0 14px rgba(77, 217, 230, 0.55), 0 0 26px rgba(77, 217, 230, 0.25);
+}
+@media (hover: none) or (pointer: coarse) {
+  .custom-cursor-root {
+    display: none;
+  }
+}
+
 
 .animate-entry {
   opacity: 0;
