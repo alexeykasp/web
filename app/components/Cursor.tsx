@@ -6,7 +6,7 @@ export type CursorProps = {
   smoothnessCoefficient?: number;
 };
 
-export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
+export default function Cursor({ smoothnessCoefficient = 0.7 }: CursorProps) {
   const trail = useRef<HTMLDivElement>(null);
   const mousePosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trailPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -64,8 +64,17 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
       if (!visible) setVisible(true);
     };
 
+    const mouseLeaveHandler = () => setVisible(false);
+    const mouseEnterHandler = () => setVisible(true);
+
     document.addEventListener("mousemove", mouseMoveHandler);
-    return () => document.removeEventListener("mousemove", mouseMoveHandler);
+    document.documentElement.addEventListener("mouseleave", mouseLeaveHandler);
+    document.documentElement.addEventListener("mouseenter", mouseEnterHandler);
+    return () => {
+      document.removeEventListener("mousemove", mouseMoveHandler);
+      document.documentElement.removeEventListener("mouseleave", mouseLeaveHandler);
+      document.documentElement.removeEventListener("mouseenter", mouseEnterHandler);
+    };
   }, [visible]);
 
   return (
