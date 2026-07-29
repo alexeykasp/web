@@ -6,13 +6,29 @@ export type CursorProps = {
   smoothnessCoefficient?: number;
 };
 
+const EXIT_DURATION_MS = 350;
+const EXIT_DISTANCE = 60;
+
+function easeOutCubic(t: number) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
 export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
   const trail = useRef<HTMLDivElement>(null);
   const mousePosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trailPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trailSize = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
-  const slidingOff = useRef(false);
-  const offscreenTarget = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Тween выхода за пределы окна: фиксированная длительность, не зависящая
+  // от того, где курсор был в момент ухода (иначе анимация могла завершаться
+  // почти мгновенно, если стартовая точка уже была близко к целевой).
+  const exitTween = useRef<{
+    active: boolean;
+    startTime: number;
+    from: { x: number; y: number };
+    to: { x: number; y: number };
+  }>({ active: false, startTime: 0, from: { x: 0, y: 0 }, to: { x: 0, y: 0 } });
+
   const [active, setActive] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -20,23 +36,32 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
     let currentFrame: number;
 
     const move = () => {
-      if (!trail.current) { currentFrame = requestAnimationFrame(move); return; }
+      if (!trail.current) {
+        currentFrame = requestAnimationFrame(move);
+        return;
+      }
 
-      if (slidingOff.current) {
-        trailPosition.current.x += (offscreenTarget.current.x - trailPosition.current.x) * 0.25;
-        trailPosition.current.y += (offscreenTarget.current.y - trailPosition.current.y) * 0.25;
+      if (exitTween.current.active) {
+        const elapsed = performance.now() - exitTween.current.startTime;
+        const progress = Math.min(1, elapsed / EXIT_DURATION_MS);
+        const eased = easeOutCubic(progress);
+
+        trailPosition.current.x =
+          exitTween.current.from.x + (exitTween.current.to.x - exitTween.current.from.x) * eased;
+        trailPosition.current.y =
+          exitTween.current.from.y + (exitTween.current.to.y - exitTween.current.from.y) * eased;
+
         trail.current.style.left = trailPosition.current.x + "px";
         trail.current.style.top = trailPosition.current.y + "px";
 
-        const dx = trailPosition.current.x - offscreenTarget.current.x;
-        const dy = trailPosition.current.y - offscreenTarget.current.y;
-        if (dx * dx + dy * dy < 4) {
-          slidingOff.current = false;
+        if (progress >= 1) {
+          exitTween.current.active = false;
           setVisible(false);
         }
       } else {
         const hoveredElement = document.elementFromPoint(
-          mousePosition.current.x, mousePosition.current.y
+          mousePosition.current.x,
+          mousePosition.current.y
         );
         const computedStyle = hoveredElement ? getComputedStyle(hoveredElement) : null;
         const cursorStyle = computedStyle?.cursor || "default";
@@ -74,15 +99,13 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
       if (!visible) setVisible(true);
     };
 
-    // mouseleave на <html> не всплывает и надёжно срабатывает именно выход за пределы окна —
-    // в отличие от mouseout+relatedTarget, который может срабатывать раньше времени
-    // (например над скроллбаром) и не требует проверки порога у края.
+    // mouseleave на <html> не всплывает и надёжно срабатывает именно при выходе
+    // за пределы окна — в отличие от mouseout+relatedTarget.
     const windowLeaveHandler = () => {
       const { x, y } = mousePosition.current;
       const w = window.innerWidth;
       const h = window.innerHeight;
 
-      // Находим ближайший край экрана от последней известной позиции курсора
       const distances: Record<string, number> = {
         left: x,
         right: w - x,
@@ -93,13 +116,17 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
 
       let tx = x;
       let ty = y;
-      if (nearestEdge === "left") tx = -60;
-      else if (nearestEdge === "right") tx = w + 60;
-      else if (nearestEdge === "top") ty = -60;
-      else if (nearestEdge === "bottom") ty = h + 60;
+      if (nearestEdge === "left") tx = -EXIT_DISTANCE;
+      else if (nearestEdge === "right") tx = w + EXIT_DISTANCE;
+      else if (nearestEdge === "top") ty = -EXIT_DISTANCE;
+      else if (nearestEdge === "bottom") ty = h + EXIT_DISTANCE;
 
-      offscreenTarget.current = { x: tx, y: ty };
-      slidingOff.current = true;
+      exitTween.current = {
+        active: true,
+        startTime: performance.now(),
+        from: { x: trailPosition.current.x, y: trailPosition.current.y },
+        to: { x: tx, y: ty },
+      };
     };
 
     document.addEventListener("mousemove", mouseMoveHandler);
