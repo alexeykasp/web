@@ -73,36 +73,40 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
       mousePosition.current = { x: e.clientX, y: e.clientY };
       if (!visible) setVisible(true);
     };
-    const mouseLeaveHandler = (e: MouseEvent) => {
-      if (!e.relatedTarget) {
-        const { x, y } = mousePosition.current;
-        const threshold = 3;
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        const atLeft = x <= threshold;
-        const atRight = x >= w - threshold;
-        const atTop = y <= threshold;
-        const atBottom = y >= h - threshold;
 
-        if (atLeft || atRight || atTop || atBottom) {
-          let tx = x, ty = y;
-          if (atLeft) tx = -60;
-          else if (atRight) tx = w + 60;
-          if (atTop) ty = -60;
-          else if (atBottom) ty = h + 60;
-          offscreenTarget.current = { x: tx, y: ty };
-          slidingOff.current = true;
-        } else {
-          setVisible(false);
-        }
-      }
+    // mouseleave на <html> не всплывает и надёжно срабатывает именно выход за пределы окна —
+    // в отличие от mouseout+relatedTarget, который может срабатывать раньше времени
+    // (например над скроллбаром) и не требует проверки порога у края.
+    const windowLeaveHandler = () => {
+      const { x, y } = mousePosition.current;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      // Находим ближайший край экрана от последней известной позиции курсора
+      const distances: Record<string, number> = {
+        left: x,
+        right: w - x,
+        top: y,
+        bottom: h - y,
+      };
+      const nearestEdge = Object.entries(distances).sort((a, b) => a[1] - b[1])[0][0];
+
+      let tx = x;
+      let ty = y;
+      if (nearestEdge === "left") tx = -60;
+      else if (nearestEdge === "right") tx = w + 60;
+      else if (nearestEdge === "top") ty = -60;
+      else if (nearestEdge === "bottom") ty = h + 60;
+
+      offscreenTarget.current = { x: tx, y: ty };
+      slidingOff.current = true;
     };
 
     document.addEventListener("mousemove", mouseMoveHandler);
-    document.addEventListener("mouseout", mouseLeaveHandler);
+    document.documentElement.addEventListener("mouseleave", windowLeaveHandler);
     return () => {
       document.removeEventListener("mousemove", mouseMoveHandler);
-      document.removeEventListener("mouseout", mouseLeaveHandler);
+      document.documentElement.removeEventListener("mouseleave", windowLeaveHandler);
     };
   }, [visible]);
 
