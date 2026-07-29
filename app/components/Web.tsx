@@ -1,8 +1,20 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
+
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return reduced;
+}
 
 export default function Web() {
   return (
@@ -12,11 +24,13 @@ export default function Web() {
 
 function TiltCard({ children }: { children: React.ReactNode }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = usePrefersReducedMotion();
   const baseTransform = "perspective(800px) rotateX(0deg) rotateY(0deg) translate3d(0,0,0) scale(1)";
   const [transform, setTransform] = useState(baseTransform);
   const [transformDuration, setTransformDuration] = useState("0.5s cubic-bezier(0.16,1,0.3,1)");
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (reducedMotion) return;
     const card = cardRef.current;
     if (!card) return;
 
@@ -38,6 +52,7 @@ function TiltCard({ children }: { children: React.ReactNode }) {
   };
 
   const handleMouseLeave = () => {
+    if (reducedMotion) return;
     setTransform(baseTransform);
     setTransformDuration("0.5s cubic-bezier(0.16,1,0.3,1)");
   };
@@ -68,6 +83,7 @@ function TiltContactButton({
   index: number;
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
+  const reducedMotion = usePrefersReducedMotion();
   const [entered, setEntered] = useState(false);
   const baseTransform = "perspective(400px) rotateX(0deg) rotateY(0deg) translateY(0px) scale(1)";
   const [transform, setTransform] = useState(baseTransform);
@@ -81,6 +97,7 @@ function TiltContactButton({
     "box-shadow 0.35s ease, border-color 0.35s ease";
 
   const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (reducedMotion) return;
     if (!entered) return;
     const el = ref.current;
     if (!el) return;
@@ -101,6 +118,7 @@ function TiltContactButton({
   };
 
   const handleMouseLeave = () => {
+    if (reducedMotion) return;
     if (!entered) return;
     setTransform(baseTransform);
     setTransformDuration("0.4s cubic-bezier(0.16,1,0.3,1)");

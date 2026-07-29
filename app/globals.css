@@ -249,8 +249,11 @@ body::before {
 }
 
 /* Кастомный курсор (вдохновилён по референсу exterasquad/exterawebsite) */
+/* html.cursor-ready выставляется только после монта React-компонента Cursor,
+   чтобы до гидратации был виден обычный системный курсор (fallback),
+   а не пустота без какого-либо курсора вообще. */
 @media (hover: hover) and (pointer: fine) {
-  * {
+  html.cursor-ready * {
     cursor: none !important;
   }
 }
@@ -266,6 +269,38 @@ body::before {
 @media (hover: none) or (pointer: coarse) {
   .custom-cursor-root {
     display: none;
+  }
+}
+
+/* prefers-reduced-motion: гасим все декоративные анимации и курсор,
+   оставляем только мгновенное появление контента без движения. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-entry,
+  .animate-avatar,
+  .animate-title,
+  .animate-text,
+  .animate-contact,
+  .animate-card {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .contact-button,
+  .contact-button:hover,
+  .contact-text,
+  .contact-button:hover .contact-text {
+    transition: none !important;
+  }
+  .custom-cursor-root {
+    display: none !important;
+  }
+  html.cursor-ready * {
+    cursor: auto !important;
+  }
+  html.cursor-ready a,
+  html.cursor-ready button,
+  html.cursor-ready [role="button"] {
+    cursor: pointer !important;
   }
 }
 

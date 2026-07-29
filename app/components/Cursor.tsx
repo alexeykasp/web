@@ -20,8 +20,7 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
   const trailSize = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
 
   // Тween выхода за пределы окна: фиксированная длительность, не зависящая
-  // от того, где курсор был в момент ухода (иначе анимация могла завершаться
-  // почти мгновенно, если стартовая точка уже была близко к целевой).
+  // от того, где курсор был в момент ухода.
   const exitTween = useRef<{
     active: boolean;
     startTime: number;
@@ -31,8 +30,33 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
 
   const [active, setActive] = useState(false);
   const [visible, setVisible] = useState(false);
+  // null пока не проверили matchMedia (на сервере/до эффекта), чтобы не мигать
+  const [reducedMotion, setReducedMotion] = useState<boolean | null>(null);
+
+  // Проверяем prefers-reduced-motion и следим за изменением в реальном времени
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // html.cursor-ready включает `cursor: none` в CSS только после монтирования —
+  // до этого момента (и всегда при reduced motion) виден обычный системный курсор.
+  useEffect(() => {
+    if (reducedMotion === false) {
+      document.documentElement.classList.add("cursor-ready");
+    } else {
+      document.documentElement.classList.remove("cursor-ready");
+    }
+    return () => {
+      document.documentElement.classList.remove("cursor-ready");
+    };
+  }, [reducedMotion]);
 
   useEffect(() => {
+    if (reducedMotion !== false) return;
     let currentFrame: number;
 
     const move = () => {
@@ -91,9 +115,11 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
     };
     currentFrame = requestAnimationFrame(move);
     return () => cancelAnimationFrame(currentFrame);
-  }, [smoothnessCoefficient]);
+  }, [smoothnessCoefficient, reducedMotion]);
 
   useEffect(() => {
+    if (reducedMotion !== false) return;
+
     const mouseMoveHandler = (e: MouseEvent) => {
       mousePosition.current = { x: e.clientX, y: e.clientY };
       if (!visible) setVisible(true);
@@ -135,7 +161,11 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
       document.removeEventListener("mousemove", mouseMoveHandler);
       document.documentElement.removeEventListener("mouseleave", windowLeaveHandler);
     };
-  }, [visible]);
+  }, [visible, reducedMotion]);
+
+  // При reduced motion (или пока не проверили) кастомный курсор не рендерим вовсе —
+  // остаётся обычный системный курсор, без движения/наклона/трейлинга.
+  if (reducedMotion !== false) return null;
 
   return (
     <div
