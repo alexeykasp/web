@@ -13,7 +13,7 @@ function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3);
 }
 
-export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
+export default function Cursor({ smoothnessCoefficient = 0.75 }: CursorProps) {
   const trail = useRef<HTMLDivElement>(null);
   const mousePosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trailPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
