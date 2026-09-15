@@ -252,19 +252,19 @@ body::before {
 /* html.cursor-ready выставляется только после монта React-компонента Cursor,
    чтобы до гидратации был виден обычный системный курсор (fallback),
    а не пустота без какого-либо курсора вообще. */
-/*@media (hover: hover) and (pointer: fine) {
-  html.cursor-ready * {
-    cursor: none !important;
-  }
-}*/
+/* Системный курсор остаётся видимым всегда — кастомная точка только подсвечивает
+   карточку контакта, не подменяя стрелку. html.cursor-ready больше ничего не прячет. */
+/* Системный курсор НЕ скрываем: точка-подсветка живёт рядом со стрелкой. */
 .custom-cursor-idle {
   background-color: var(--primary-color);
   box-shadow: 0 0 10px rgba(217, 74, 114, 0.6), 0 0 18px rgba(217, 74, 114, 0.3);
 }
 .custom-cursor-active {
+  /* не заливаем карточку белым — только обводка по её краю:
+     фон прозрачный, заметен мягкий светящийся контур */
   background-color: transparent;
-  border: 1.5px solid var(--glow-cyan);
-  box-shadow: 0 0 14px rgba(77, 217, 230, 0.55), 0 0 26px rgba(77, 217, 230, 0.25);
+  border: 1.5px solid rgba(217, 74, 114, 0.9);
+  box-shadow: 0 0 14px rgba(217, 74, 114, 0.45), inset 0 0 10px rgba(217, 74, 114, 0.2);
 }
 @media (hover: none) or (pointer: coarse) {
   .custom-cursor-root {

@@ -8,16 +8,27 @@ export type CursorProps = {
 
 const EXIT_DURATION_MS = 350;
 const EXIT_DISTANCE = 60;
+const SPREAD_DURATION_MS = 450;
 
 function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3);
 }
 
-export default function Cursor({ smoothnessCoefficient = 0.75 }: CursorProps) {
+export default function Cursor({ smoothnessCoefficient = 0.85 }: CursorProps) {
   const trail = useRef<HTMLDivElement>(null);
   const mousePosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trailPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trailSize = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+
+  // Твин «растекания»: точка перетекает в карточку фиксированной длительностью,
+  // а не подтягивается лерпом (иначе это выглядит как телепорт).
+  const spread = useRef<{
+    active: boolean;
+    startTime: number;
+    fromPos: { x: number; y: number };
+    fromSize: { width: number; height: number };
+  }>({ active: false, startTime: 0, fromPos: { x: 0, y: 0 }, fromSize: { width: 0, height: 0 } });
+  const wasOnMagnet = useRef(false);
 
   // Тween выхода за пределы окна: фиксированная длительность, не зависящая
   // от того, где курсор был в момент ухода.
@@ -87,29 +98,105 @@ export default function Cursor({ smoothnessCoefficient = 0.75 }: CursorProps) {
           mousePosition.current.x,
           mousePosition.current.y
         );
-        const computedStyle = hoveredElement ? getComputedStyle(hoveredElement) : null;
-        const cursorStyle = computedStyle?.cursor || "default";
-        const isInteractive = cursorStyle === "pointer";
+        // Точка идёт строго за мышью; на карточке контакта она лишь слегка
+        // меняет оттенок, оставаясь полупрозрачной — карточка видна целиком,
+        // системный курсор не прячем.
+        // На карточке контакта курор ложится ровно на неё: живой rect карточки
+        // без лага (она сама анимирует размер), её же border-radius, и светит
+        // screen-блоком — осветляет, а не затемняет.
+        const magnet = hoveredElement?.closest?.(".contact-button") as HTMLElement | null ?? null;
+        // getBoundingClientRect у наклонённой карточки — раздутый бустащий bbox
+        // (он «уезжает» при tilt, и обводка летит левее/выше). Берём НЕтрасформированный
+        // layout-бокс: offsetWidth/offsetHeight + offsetLeft/offsetTop по цепочке,
+        // приведённые к координатам вьюпорта.
+        let rect: { left: number; top: number; width: number; height: number } | null = null;
+        if (magnet) {
+          let ox = 0;
+          let oy = 0;
+          for (let n: HTMLElement | null = magnet; n; n = n.offsetParent as HTMLElement | null) {
+            ox += n.offsetLeft;
+            oy += n.offsetTop;
+          }
+          rect = {
+            left: ox - window.scrollX,
+            top: oy - window.scrollY,
+            width: magnet.offsetWidth,
+            height: magnet.offsetHeight,
+          };
+        }
 
-        trailPosition.current.x =
-          trailPosition.current.x * smoothnessCoefficient +
-          mousePosition.current.x * (1 - smoothnessCoefficient);
-        trailPosition.current.y =
-          trailPosition.current.y * smoothnessCoefficient +
-          mousePosition.current.y * (1 - smoothnessCoefficient);
+        if (rect && magnet) {
+          const tx = rect.left + rect.width / 2;
+          const ty = rect.top + rect.height / 2;
+          if (!wasOnMagnet.current) {
+            // только что зашли на карточку: записываем, откуда растекаться
+            spread.current = {
+              active: true,
+              startTime: performance.now(),
+              fromPos: { x: trailPosition.current.x, y: trailPosition.current.y },
+              fromSize: { width: trailSize.current.width, height: trailSize.current.height },
+            };
+            wasOnMagnet.current = true;
+          }
+          if (spread.current.active) {
+            // фиксированные 450ms ease-out: точка явно перетекает в карточку,
+            // а не догоняет её лерпом (лерп сходится за 2-3 кадра = телепорт)
+            const progress = Math.min(
+              1,
+              (performance.now() - spread.current.startTime) / SPREAD_DURATION_MS
+            );
+            const eased = easeOutCubic(progress);
+            trailPosition.current.x =
+              spread.current.fromPos.x + (tx - spread.current.fromPos.x) * eased;
+            trailPosition.current.y =
+              spread.current.fromPos.y + (ty - spread.current.fromPos.y) * eased;
+            trailSize.current.width =
+              spread.current.fromSize.width + (rect.width - spread.current.fromSize.width) * eased;
+            trailSize.current.height =
+              spread.current.fromSize.height + (rect.height - spread.current.fromSize.height) * eased;
+            if (progress >= 1) spread.current.active = false;
+          } else {
+            // уже растеклась — просто прилипаем к живому rect карточки
+            trailPosition.current.x = tx;
+            trailPosition.current.y = ty;
+            trailSize.current.width = rect.width;
+            trailSize.current.height = rect.height;
+          }
+          trail.current.style.borderRadius = getComputedStyle(magnet).borderRadius;
+          // полностью повторяем визуальный трансформ карточки (tilt+scale+перспектива
+          // из computed matrix), иначе обводка расходится с наклоном карточки;
+          // translate(-50%,-50%) даёт центрирование, композиция оставляет центр на месте
+          const tstr = getComputedStyle(magnet).transform;
+          // Tailwind-класс (-translate-x/y-1/2) использует CSS-свойство translate,
+          // которое уже центрирует box; здесь добавлять translate(-50%) внутри
+          // transform нельзя — будет двойной сдвиг на половину размера.
+          // Matrix карточки (tilt+scale+перспектива) прокручивается вокруг центра box,
+          // значит визуальный бокс обводки = визуальный бокс карточки.
+          trail.current.style.transform = tstr && tstr !== "none" ? tstr : "none";
+        } else {
+          wasOnMagnet.current = false;
+          spread.current.active = false;
+          trail.current.style.transform = "";
+          trailPosition.current.x =
+            trailPosition.current.x * smoothnessCoefficient +
+            mousePosition.current.x * (1 - smoothnessCoefficient);
+          trailPosition.current.y =
+            trailPosition.current.y * smoothnessCoefficient +
+            mousePosition.current.y * (1 - smoothnessCoefficient);
+          trailSize.current.width =
+            trailSize.current.width * smoothnessCoefficient + 14 * (1 - smoothnessCoefficient);
+          trailSize.current.height =
+            trailSize.current.height * smoothnessCoefficient + 14 * (1 - smoothnessCoefficient);
+          trail.current.style.borderRadius =
+            Math.min(trailSize.current.width, trailSize.current.height) / 2 + "px";
+        }
 
         trail.current.style.left = trailPosition.current.x + "px";
         trail.current.style.top = trailPosition.current.y + "px";
-
-        const sizeTarget = isInteractive ? { width: 46, height: 46 } : { width: 14, height: 14 };
-        trailSize.current.width =
-          trailSize.current.width * smoothnessCoefficient + sizeTarget.width * (1 - smoothnessCoefficient);
-        trailSize.current.height =
-          trailSize.current.height * smoothnessCoefficient + sizeTarget.height * (1 - smoothnessCoefficient);
         trail.current.style.width = trailSize.current.width + "px";
         trail.current.style.height = trailSize.current.height + "px";
 
-        setActive(isInteractive);
+        setActive(!!magnet);
       }
       currentFrame = requestAnimationFrame(move);
     };
@@ -177,7 +264,8 @@ export default function Cursor({ smoothnessCoefficient = 0.75 }: CursorProps) {
         className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none transition-colors duration-300 ease-out ${
           active ? "custom-cursor-active" : "custom-cursor-idle"
         }`}
-      />
+      >
+      </div>
     </div>
   );
 }
