@@ -284,6 +284,7 @@ body::before {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+    pointer-events: auto !important;
   }
   .contact-button,
   .contact-button:hover,
@@ -305,59 +306,71 @@ body::before {
 }
 
 
+/* Пока элемент не появился (opacity 0 / задержка анимации), он физически
+   отсутствует: pointer-events отключены, так что hover и elementFromPoint
+   (кастомный курсор) его не видят. Включаются дискретно внутри keyframes,
+   когда элемент уже достаточно непрозрачен. */
 .animate-entry {
   opacity: 0;
   transform: scale(0.96) translateY(4px);
+  pointer-events: none;
   animation: entrySmooth 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 .animate-avatar {
   opacity: 0;
   transform: scale(0.7);
+  pointer-events: none;
   animation: popInSoft 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.12s forwards;
 }
 .animate-title {
   opacity: 0;
   transform: translateY(-12px);
+  pointer-events: none;
   animation: fadeInUpSoft 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.32s forwards;
 }
 .animate-text {
   opacity: 0;
   transform: translateY(-10px);
+  pointer-events: none;
   animation: fadeInUpSoft 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.48s forwards;
 }
 .animate-contact {
   opacity: 0;
   transform: translateY(12px) scale(0.98);
+  pointer-events: none;
   animation: contactFloat 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .animate-card {
   opacity: 0;
   transform: translateY(14px);
+  pointer-events: none;
   animation: cardReveal 0.55s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
 }
 
+/* pointer-events — неинтерполируемое свойство: значение переключается ровно
+   на старте keyframe с auto; до этого сегмента держится none */
 @keyframes entrySmooth {
-  0% { opacity: 0; transform: scale(0.96) translateY(4px); }
-  80% { opacity: 1; transform: scale(1.01) translateY(-2px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
+  0% { opacity: 0; transform: scale(0.96) translateY(4px); pointer-events: none; }
+  80% { opacity: 1; transform: scale(1.01) translateY(-2px); pointer-events: auto; }
+  100% { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
 }
 @keyframes popInSoft {
-  0% { opacity: 0; transform: scale(0.7) rotate(-4deg); }
-  60% { opacity: 1; transform: scale(1.03) rotate(1deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0); }
+  0% { opacity: 0; transform: scale(0.7) rotate(-4deg); pointer-events: none; }
+  60% { opacity: 1; transform: scale(1.03) rotate(1deg); pointer-events: auto; }
+  100% { opacity: 1; transform: scale(1) rotate(0); pointer-events: auto; }
 }
 @keyframes fadeInUpSoft {
-  0% { opacity: 0; transform: translateY(14px); }
-  70% { opacity: 1; transform: translateY(-2px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% { opacity: 0; transform: translateY(14px); pointer-events: none; }
+  70% { opacity: 1; transform: translateY(-2px); pointer-events: auto; }
+  100% { opacity: 1; transform: translateY(0); pointer-events: auto; }
 }
 @keyframes contactFloat {
-  0% { opacity: 0; transform: translateY(12px) scale(0.92); }
-  65% { opacity: 1; transform: translateY(-2px) scale(1.04); }
-  100% { opacity: 1; transform: translateY(0px) scale(1); }
+  0% { opacity: 0; transform: translateY(12px) scale(0.92); pointer-events: none; }
+  65% { opacity: 1; transform: translateY(-2px) scale(1.04); pointer-events: auto; }
+  100% { opacity: 1; transform: translateY(0px) scale(1); pointer-events: auto; }
 }
 @keyframes cardReveal {
-  0% { opacity: 0; transform: translateY(18px) scale(0.98); }
-  80% { opacity: 1; transform: translateY(-2px) scale(1.006); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0% { opacity: 0; transform: translateY(18px) scale(0.98); pointer-events: none; }
+  80% { opacity: 1; transform: translateY(-2px) scale(1.006); pointer-events: auto; }
+  100% { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
 }

@@ -96,6 +96,18 @@ function TiltContactButton({
     "background-color 0.35s ease, color 0.35s ease, " +
     "box-shadow 0.35s ease, border-color 0.35s ease";
 
+  // Гонка гидратации: CSS-анимация появления может закончиться ДО того, как
+  // React навесит onAnimationEnd, и тогда entered никогда не выставится.
+  // При монтировании проверяем, не отыграны ли уже анимации.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const anims = el.getAnimations();
+    if (anims.length === 0 || anims.every((a) => a.playState === "finished")) {
+      setEntered(true);
+    }
+  }, []);
+
   const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (reducedMotion) return;
     if (!entered) return;
