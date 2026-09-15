@@ -252,11 +252,11 @@ body::before {
 /* html.cursor-ready выставляется только после монта React-компонента Cursor,
    чтобы до гидратации был виден обычный системный курсор (fallback),
    а не пустота без какого-либо курсора вообще. */
-@media (hover: hover) and (pointer: fine) {
+/*@media (hover: hover) and (pointer: fine) {
   html.cursor-ready * {
     cursor: none !important;
   }
-}
+}*/
 .custom-cursor-idle {
   background-color: var(--primary-color);
   box-shadow: 0 0 10px rgba(217, 74, 114, 0.6), 0 0 18px rgba(217, 74, 114, 0.3);
