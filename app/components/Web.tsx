@@ -210,7 +210,7 @@ function MainContent() {
           className="mb-8 rounded-full overflow-hidden w-36 h-36 shadow-lg animate-avatar"
           style={{ boxShadow: "0 0 12px rgba(217,74,114,0.25)", border: "2px solid rgba(217,74,114,0.25)" }}
         >
-          <Image src="/avatar.png" alt="Avatar" width={144} height={144} priority />
+          <Image src={"/avatar.webp"} alt="Avatar" width={144} height={144} priority />
         </div>
 
         <h1
