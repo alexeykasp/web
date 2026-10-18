@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePrefersReducedMotion } from "@/lib/hooks/use-prefers-reduced-motion";
 
 export type CursorProps = {
   smoothnessCoefficient?: number;
@@ -9,52 +10,66 @@ export type CursorProps = {
 const EXIT_DURATION_MS = 350;
 const EXIT_DISTANCE = 60;
 const SPREAD_DURATION_MS = 450;
+const RETURN_DURATION_MS = 260;
+// «Скорость следования» (0.8/кадр при 60fps) пересчитывается в постоянную
+// времени экспоненциального сглаживания — поведение не зависит от частоты монитора.
+const FRAME_MS = 1000 / 60;
 
 function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3);
 }
 
-export default function Cursor({ smoothnessCoefficient = 0.85 }: CursorProps) {
+type Point = { x: number; y: number };
+type Size = { width: number; height: number };
+type Rect = { left: number; top: number; width: number; height: number };
+
+export default function Cursor({ smoothnessCoefficient = 0.8 }: CursorProps) {
   const trail = useRef<HTMLDivElement>(null);
-  const mousePosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const trailPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const trailSize = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const mousePosition = useRef<Point>({ x: 0, y: 0 });
+  const trailPosition = useRef<Point>({ x: 0, y: 0 });
+  const trailSize = useRef<Size>({ width: 0, height: 0 });
+  const lastFrameTime = useRef(0);
 
-  // Твин «растекания»: точка перетекает в карточку фиксированной длительностью,
-  // а не подтягивается лерпом (иначе это выглядит как телепорт).
-  const spread = useRef<{
-    active: boolean;
-    startTime: number;
-    fromPos: { x: number; y: number };
-    fromSize: { width: number; height: number };
-  }>({ active: false, startTime: 0, fromPos: { x: 0, y: 0 }, fromSize: { width: 0, height: 0 } });
-  const wasOnMagnet = useRef(false);
+  // Растекание по карточке: фиксированный твин из текущего положения,
+  // а не лерп (лерп сходится за 2-3 кадра — выглядит как телепорт).
+  const spread = useRef<{ active: boolean; startTime: number; fromPos: Point; fromSize: Size }>({
+    active: false,
+    startTime: 0,
+    fromPos: { x: 0, y: 0 },
+    fromSize: { width: 0, height: 0 },
+  });
+  // Возврат с карточки к мыши: тоже твин — плавный сход, без рывка.
+  const returnTween = useRef<{ active: boolean; startTime: number; fromPos: Point; fromSize: Size }>({
+    active: false,
+    startTime: 0,
+    fromPos: { x: 0, y: 0 },
+    fromSize: { width: 0, height: 0 },
+  });
+  // Текущая карточка-магнит: смена (в т.ч. на соседнюю) всегда перезапускает
+  // твин из текущего положения — никаких мгновенных прыжков между карточками.
+  const magnetEl = useRef<HTMLElement | null>(null);
+  const interactiveRef = useRef(false);
 
-  // Тween выхода за пределы окна: фиксированная длительность, не зависящая
+  // Твин выхода за пределы окна: фиксированная длительность, не зависящая
   // от того, где курсор был в момент ухода.
-  const exitTween = useRef<{
-    active: boolean;
-    startTime: number;
-    from: { x: number; y: number };
-    to: { x: number; y: number };
-  }>({ active: false, startTime: 0, from: { x: 0, y: 0 }, to: { x: 0, y: 0 } });
+  const exitTween = useRef<{ active: boolean; startTime: number; from: Point; to: Point }>({
+    active: false,
+    startTime: 0,
+    from: { x: 0, y: 0 },
+    to: { x: 0, y: 0 },
+  });
+
+  // Alt+Tab / потеря фокуса: скрыть мгновенно, без улёта к краю;
+  // при возврате — мгновенный спавн в позиции мыши (teleportNext).
+  const hiddenByBlur = useRef(false);
+  const teleportNext = useRef(false);
 
   const [active, setActive] = useState(false);
   const [visible, setVisible] = useState(false);
-  // null пока не проверили matchMedia (на сервере/до эффекта), чтобы не мигать
-  const [reducedMotion, setReducedMotion] = useState<boolean | null>(null);
+  const reducedMotion = usePrefersReducedMotion();
 
-  // Проверяем prefers-reduced-motion и следим за изменением в реальном времени
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  // html.cursor-ready включает `cursor: none` в CSS только после монтирования —
-  // до этого момента (и всегда при reduced motion) виден обычный системный курсор.
+  // html.cursor-ready сегодня ничего не прячет (системный курсор виден всегда),
+  // но класс остаётся для reduced-motion блока в CSS.
   useEffect(() => {
     if (reducedMotion === false) {
       document.documentElement.classList.add("cursor-ready");
@@ -69,15 +84,34 @@ export default function Cursor({ smoothnessCoefficient = 0.85 }: CursorProps) {
   useEffect(() => {
     if (reducedMotion !== false) return;
     let currentFrame: number;
+    const followTau = FRAME_MS / -Math.log(smoothnessCoefficient);
 
     const move = () => {
+      const now = performance.now();
       if (!trail.current) {
         currentFrame = requestAnimationFrame(move);
         return;
       }
+      const dt = Math.min(64, Math.max(1, now - lastFrameTime.current));
+      lastFrameTime.current = now;
+
+      if (teleportNext.current) {
+        // мгновенный спавн в позиции мыши: возврат фокуса / из-за края
+        teleportNext.current = false;
+        exitTween.current.active = false;
+        returnTween.current.active = false;
+        spread.current.active = false;
+        magnetEl.current = null;
+        trailPosition.current = { ...mousePosition.current };
+        trailSize.current = { width: 14, height: 14 };
+        if (interactiveRef.current) {
+          interactiveRef.current = false;
+          setActive(false);
+        }
+      }
 
       if (exitTween.current.active) {
-        const elapsed = performance.now() - exitTween.current.startTime;
+        const elapsed = now - exitTween.current.startTime;
         const progress = Math.min(1, elapsed / EXIT_DURATION_MS);
         const eased = easeOutCubic(progress);
 
@@ -98,95 +132,105 @@ export default function Cursor({ smoothnessCoefficient = 0.85 }: CursorProps) {
           mousePosition.current.x,
           mousePosition.current.y
         );
-        // Точка идёт строго за мышью; на карточке контакта она лишь слегка
-        // меняет оттенок, оставаясь полупрозрачной — карточка видна целиком,
-        // системный курсор не прячем.
-        // На карточке контакта курор ложится ровно на неё: живой rect карточки
-        // без лага (она сама анимирует размер), её же border-radius, и светит
-        // screen-блоком — осветляет, а не затемняет.
-        const magnet = hoveredElement?.closest?.(".contact-button") as HTMLElement | null ?? null;
-        // getBoundingClientRect у наклонённой карточки — раздутый бустащий bbox
-        // (он «уезжает» при tilt, и обводка летит левее/выше). Берём НЕтрасформированный
-        // layout-бокс: offsetWidth/offsetHeight + offsetLeft/offsetTop по цепочке,
-        // приведённые к координатам вьюпорта.
-        let rect: { left: number; top: number; width: number; height: number } | null = null;
+        const magnet = (hoveredElement?.closest(".contact-button") as HTMLElement | null) ?? null;
+
+        // Заход на карточку, смена карточки или уход — всегда твин
+        // из текущего положения точки.
+        if (magnet !== magnetEl.current) {
+          if (magnet) {
+            returnTween.current.active = false;
+            spread.current = {
+              active: true,
+              startTime: now,
+              fromPos: { ...trailPosition.current },
+              fromSize: { ...trailSize.current },
+            };
+          } else {
+            spread.current.active = false;
+            returnTween.current = {
+              active: true,
+              startTime: now,
+              fromPos: { ...trailPosition.current },
+              fromSize: { ...trailSize.current },
+            };
+          }
+          magnetEl.current = magnet;
+        }
+
+        // getBoundingClientRect у наклонённой карточки — раздутый bbox.
+        // Берём нетрансформированный layout-бокс: offsetWidth/Height + цепочка
+        // offsetParent, приведённые к координатам вьюпорта.
+        let rect: Rect | null = null;
         if (magnet) {
-          let ox = 0;
-          let oy = 0;
-          for (let n: HTMLElement | null = magnet; n; n = n.offsetParent as HTMLElement | null) {
-            ox += n.offsetLeft;
-            oy += n.offsetTop;
+          let left = 0;
+          let top = 0;
+          let el: HTMLElement | null = magnet;
+          while (el) {
+            left += el.offsetLeft;
+            top += el.offsetTop;
+            el = el.offsetParent as HTMLElement | null;
           }
           rect = {
-            left: ox - window.scrollX,
-            top: oy - window.scrollY,
+            left: left - window.scrollX,
+            top: top - window.scrollY,
             width: magnet.offsetWidth,
             height: magnet.offsetHeight,
           };
         }
 
         if (rect && magnet) {
-          const tx = rect.left + rect.width / 2;
-          const ty = rect.top + rect.height / 2;
-          if (!wasOnMagnet.current) {
-            // только что зашли на карточку: записываем, откуда растекаться
-            spread.current = {
-              active: true,
-              startTime: performance.now(),
-              fromPos: { x: trailPosition.current.x, y: trailPosition.current.y },
-              fromSize: { width: trailSize.current.width, height: trailSize.current.height },
-            };
-            wasOnMagnet.current = true;
-          }
+          const targetX = rect.left + rect.width / 2;
+          const targetY = rect.top + rect.height / 2;
+
           if (spread.current.active) {
-            // фиксированные 450ms ease-out: точка явно перетекает в карточку,
-            // а не догоняет её лерпом (лерп сходится за 2-3 кадра = телепорт)
-            const progress = Math.min(
-              1,
-              (performance.now() - spread.current.startTime) / SPREAD_DURATION_MS
-            );
+            const progress = Math.min(1, (now - spread.current.startTime) / SPREAD_DURATION_MS);
             const eased = easeOutCubic(progress);
             trailPosition.current.x =
-              spread.current.fromPos.x + (tx - spread.current.fromPos.x) * eased;
+              spread.current.fromPos.x + (targetX - spread.current.fromPos.x) * eased;
             trailPosition.current.y =
-              spread.current.fromPos.y + (ty - spread.current.fromPos.y) * eased;
+              spread.current.fromPos.y + (targetY - spread.current.fromPos.y) * eased;
             trailSize.current.width =
               spread.current.fromSize.width + (rect.width - spread.current.fromSize.width) * eased;
             trailSize.current.height =
-              spread.current.fromSize.height + (rect.height - spread.current.fromSize.height) * eased;
+              spread.current.fromSize.height +
+              (rect.height - spread.current.fromSize.height) * eased;
             if (progress >= 1) spread.current.active = false;
           } else {
-            // уже растеклась — просто прилипаем к живому rect карточки
-            trailPosition.current.x = tx;
-            trailPosition.current.y = ty;
+            // уже растеклась — прилипаем к живому rect карточки
+            trailPosition.current.x = targetX;
+            trailPosition.current.y = targetY;
             trailSize.current.width = rect.width;
             trailSize.current.height = rect.height;
           }
+
           trail.current.style.borderRadius = getComputedStyle(magnet).borderRadius;
-          // полностью повторяем визуальный трансформ карточки (tilt+scale+перспектива
-          // из computed matrix), иначе обводка расходится с наклоном карточки;
-          // translate(-50%,-50%) даёт центрирование, композиция оставляет центр на месте
+          // полностью повторяем визуальный трансформ карточки (tilt+scale+перспектива)
           const tstr = getComputedStyle(magnet).transform;
-          // Tailwind-класс (-translate-x/y-1/2) использует CSS-свойство translate,
-          // которое уже центрирует box; здесь добавлять translate(-50%) внутри
-          // transform нельзя — будет двойной сдвиг на половину размера.
-          // Matrix карточки (tilt+scale+перспектива) прокручивается вокруг центра box,
-          // значит визуальный бокс обводки = визуальный бокс карточки.
           trail.current.style.transform = tstr && tstr !== "none" ? tstr : "none";
-        } else {
-          wasOnMagnet.current = false;
-          spread.current.active = false;
-          trail.current.style.transform = "";
+        } else if (returnTween.current.active) {
+          // плавный сход с карточки к мыши (цель ретаргетится каждый кадр)
+          const progress = Math.min(1, (now - returnTween.current.startTime) / RETURN_DURATION_MS);
+          const eased = easeOutCubic(progress);
           trailPosition.current.x =
-            trailPosition.current.x * smoothnessCoefficient +
-            mousePosition.current.x * (1 - smoothnessCoefficient);
+            returnTween.current.fromPos.x + (mousePosition.current.x - returnTween.current.fromPos.x) * eased;
           trailPosition.current.y =
-            trailPosition.current.y * smoothnessCoefficient +
-            mousePosition.current.y * (1 - smoothnessCoefficient);
+            returnTween.current.fromPos.y + (mousePosition.current.y - returnTween.current.fromPos.y) * eased;
           trailSize.current.width =
-            trailSize.current.width * smoothnessCoefficient + 14 * (1 - smoothnessCoefficient);
+            returnTween.current.fromSize.width + (14 - returnTween.current.fromSize.width) * eased;
           trailSize.current.height =
-            trailSize.current.height * smoothnessCoefficient + 14 * (1 - smoothnessCoefficient);
+            returnTween.current.fromSize.height + (14 - returnTween.current.fromSize.height) * eased;
+          trail.current.style.transform = "";
+          trail.current.style.borderRadius =
+            Math.min(trailSize.current.width, trailSize.current.height) / 2 + "px";
+          if (progress >= 1) returnTween.current.active = false;
+        } else {
+          trail.current.style.transform = "";
+          // сглаживание, независимое от частоты кадров (0.8/кадр @60fps)
+          const alpha = 1 - Math.exp(-dt / followTau);
+          trailPosition.current.x += (mousePosition.current.x - trailPosition.current.x) * alpha;
+          trailPosition.current.y += (mousePosition.current.y - trailPosition.current.y) * alpha;
+          trailSize.current.width += (14 - trailSize.current.width) * alpha;
+          trailSize.current.height += (14 - trailSize.current.height) * alpha;
           trail.current.style.borderRadius =
             Math.min(trailSize.current.width, trailSize.current.height) / 2 + "px";
         }
@@ -196,10 +240,15 @@ export default function Cursor({ smoothnessCoefficient = 0.85 }: CursorProps) {
         trail.current.style.width = trailSize.current.width + "px";
         trail.current.style.height = trailSize.current.height + "px";
 
-        setActive(!!magnet);
+        const isInteractive = !!magnet;
+        if (interactiveRef.current !== isInteractive) {
+          interactiveRef.current = isInteractive;
+          setActive(isInteractive);
+        }
       }
       currentFrame = requestAnimationFrame(move);
     };
+
     currentFrame = requestAnimationFrame(move);
     return () => cancelAnimationFrame(currentFrame);
   }, [smoothnessCoefficient, reducedMotion]);
@@ -209,22 +258,25 @@ export default function Cursor({ smoothnessCoefficient = 0.85 }: CursorProps) {
 
     const mouseMoveHandler = (e: MouseEvent) => {
       mousePosition.current = { x: e.clientX, y: e.clientY };
+      // возврат в окно во время улёта к краю или после Alt+Tab —
+      // отменяем улёт и мгновенно спавнимся в позиции мыши
+      if (exitTween.current.active || hiddenByBlur.current) {
+        teleportNext.current = true;
+        hiddenByBlur.current = false;
+      }
       if (!visible) setVisible(true);
     };
 
     // mouseleave на <html> не всплывает и надёжно срабатывает именно при выходе
-    // за пределы окна — в отличие от mouseout+relatedTarget.
+    // за пределы окна. Alt+Tab тоже может его вызвать — тогда окна уже без
+    // фокуса, и улёт к краю не запускаем (скроет blur-обработчик).
     const windowLeaveHandler = () => {
+      if (!document.hasFocus()) return;
       const { x, y } = mousePosition.current;
       const w = window.innerWidth;
       const h = window.innerHeight;
 
-      const distances: Record<string, number> = {
-        left: x,
-        right: w - x,
-        top: y,
-        bottom: h - y,
-      };
+      const distances: Record<string, number> = { left: x, right: w - x, top: y, bottom: h - y };
       const nearestEdge = Object.entries(distances).sort((a, b) => a[1] - b[1])[0][0];
 
       let tx = x;
@@ -242,11 +294,26 @@ export default function Cursor({ smoothnessCoefficient = 0.85 }: CursorProps) {
       };
     };
 
+    // Alt+Tab: просто мгновенно скрыть точку (без улёта к краю);
+    // при возврате фокуса она спавнится в позиции мыши (mouseMoveHandler).
+    const windowBlurHandler = () => {
+      hiddenByBlur.current = true;
+      exitTween.current.active = false;
+      setVisible(false);
+    };
+    const visibilityChangeHandler = () => {
+      if (document.hidden) windowBlurHandler();
+    };
+
     document.addEventListener("mousemove", mouseMoveHandler);
     document.documentElement.addEventListener("mouseleave", windowLeaveHandler);
+    window.addEventListener("blur", windowBlurHandler);
+    document.addEventListener("visibilitychange", visibilityChangeHandler);
     return () => {
       document.removeEventListener("mousemove", mouseMoveHandler);
       document.documentElement.removeEventListener("mouseleave", windowLeaveHandler);
+      window.removeEventListener("blur", windowBlurHandler);
+      document.removeEventListener("visibilitychange", visibilityChangeHandler);
     };
   }, [visible, reducedMotion]);
 
@@ -261,11 +328,10 @@ export default function Cursor({ smoothnessCoefficient = 0.85 }: CursorProps) {
     >
       <div
         ref={trail}
-        className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none transition-colors duration-300 ease-out ${
+        className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none ${
           active ? "custom-cursor-active" : "custom-cursor-idle"
         }`}
-      >
-      </div>
+      />
     </div>
   );
 }
