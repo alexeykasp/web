@@ -120,6 +120,9 @@ main {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    /* фиксированный бокс 24px — как прежняя grid-колонка: круги всех кнопок одного диаметра */
+    width: 24px;
+    flex: none;
 }
 .contact-text {
     display: inline-block;
