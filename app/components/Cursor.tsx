@@ -19,6 +19,7 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
   const mousePosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trailPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trailSize = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const interactiveRef = useRef(false);
 
   // Тween выхода за пределы окна: фиксированная длительность, не зависящая
   // от того, где курсор был в момент ухода.
@@ -79,9 +80,11 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
           mousePosition.current.x,
           mousePosition.current.y
         );
-        const computedStyle = hoveredElement ? getComputedStyle(hoveredElement) : null;
-        const cursorStyle = computedStyle?.cursor || "default";
-        const isInteractive = cursorStyle === "pointer";
+        // computed cursor не подходит: html.cursor-ready * { cursor: none !important }
+        // перекрывает pointer у ссылок и кнопок — определяем интерактивность по DOM.
+        const isInteractive = !!hoveredElement?.closest(
+          "a, button, [role='button'], [data-cursor='pointer']"
+        );
 
         trailPosition.current.x =
           trailPosition.current.x * smoothnessCoefficient +
@@ -101,7 +104,10 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
         trail.current.style.width = trailSize.current.width + "px";
         trail.current.style.height = trailSize.current.height + "px";
 
-        setActive(isInteractive);
+        if (interactiveRef.current !== isInteractive) {
+          interactiveRef.current = isInteractive;
+          setActive(isInteractive);
+        }
       }
       currentFrame = requestAnimationFrame(move);
     };
