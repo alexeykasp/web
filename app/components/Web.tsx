@@ -139,6 +139,18 @@ function TiltContactButton({ item, index }: { item: Contact; index: number }) {
     el.style.transition = CONTACT_TILT_FAST;
   };
 
+  // Гонка гидратации: CSS-анимация появления может закончиться ДО того, как
+  // React навесит onAnimationEnd, и тогда entered никогда не выставится.
+  // При монтировании проверяем, не отыграны ли уже анимации.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const anims = el.getAnimations();
+    if (anims.length === 0 || anims.every((a) => a.playState === "finished")) {
+      setEntered(true);
+    }
+  }, []);
+
   const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (reducedMotion || !entered) return;
     pointer.current = { x: e.clientX, y: e.clientY };
