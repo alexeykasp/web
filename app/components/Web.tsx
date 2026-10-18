@@ -105,10 +105,13 @@ function TiltCard({ children }: { children: React.ReactNode }) {
       onMouseLeave={handleMouseLeave}
       style={{
         transform: CARD_BASE_TRANSFORM,
-        transition: "transform 0.5s cubic-bezier(0.16,1,0.3,1)",
+        // box-shadow в инлайне: инлайновый transition перекрывает класс
+        // transition-shadow — иначе свечение карточки выскакивает мгновенно
+        transition:
+          "transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.5s ease-out",
         transformStyle: "preserve-3d",
       }}
-      className="hover:shadow-[0_0_22px_var(--shadow-color)] rounded-xl"
+      className="hover:shadow-[0_0_22px_var(--shadow-color)] rounded-xl transition-shadow duration-500 ease-out"
     >
       {children}
     </div>
@@ -143,10 +146,10 @@ function TiltContactButton({ item, index }: { item: Contact; index: number }) {
   // React навесит onAnimationEnd, и тогда entered никогда не выставится.
   // При монтировании проверяем, не отыграны ли уже анимации.
   useEffect(() => {
-    const el = ref.current;
+    const el = anchorRef.current;
     if (!el) return;
     const anims = el.getAnimations();
-    if (anims.length === 0 || anims.every((a) => a.playState === "finished")) {
+    if (anims.length === 0 || anims.every((a: Animation) => a.playState === "finished")) {
       setEntered(true);
     }
   }, []);
