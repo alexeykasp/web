@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePrefersReducedMotion } from "@/lib/hooks/use-prefers-reduced-motion";
 
 export type CursorProps = {
   smoothnessCoefficient?: number;
@@ -31,16 +32,7 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
   const [active, setActive] = useState(false);
   const [visible, setVisible] = useState(false);
   // null пока не проверили matchMedia (на сервере/до эффекта), чтобы не мигать
-  const [reducedMotion, setReducedMotion] = useState<boolean | null>(null);
-
-  // Проверяем prefers-reduced-motion и следим за изменением в реальном времени
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
+  const reducedMotion = usePrefersReducedMotion();
 
   // html.cursor-ready включает `cursor: none` в CSS только после монтирования —
   // до этого момента (и всегда при reduced motion) виден обычный системный курсор.
