@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 
@@ -83,11 +83,20 @@ function TiltContactButton({
   index: number;
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
   const reducedMotion = usePrefersReducedMotion();
   const [entered, setEntered] = useState(false);
   const baseTransform = "perspective(400px) rotateX(0deg) rotateY(0deg) translateY(0px) scale(1)";
   const [transform, setTransform] = useState(baseTransform);
   const [transformDuration, setTransformDuration] = useState("0.4s cubic-bezier(0.16,1,0.3,1)");
+
+  // Точная ширина текста → CSS-переменная --text-max (раскрытие кнопки без grid-анимации)
+  useLayoutEffect(() => {
+    const el = textRef.current;
+    if (el?.parentElement) {
+      el.parentElement.style.setProperty("--text-max", `${el.scrollWidth}px`);
+    }
+  }, []);
 
   const baseTransitions =
     "grid-template-columns 0.5s cubic-bezier(0.65,0,0.35,1), " +
@@ -148,7 +157,7 @@ function TiltContactButton({
       <span className="contact-icon">
         <Image src={item.svgSrc} alt={item.title} width={item.size} height={item.size} />
       </span>
-      <span className="contact-text">{item.title}</span>
+      <span className="contact-text" ref={textRef}>{item.title}</span>
     </a>
   );
 }

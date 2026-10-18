@@ -69,11 +69,10 @@ main {
 .contact-button {
     position: relative;
     height: 42px;
-    display: inline-grid;
-    grid-template-columns: 24px 0fr;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    column-gap: 0;
+    gap: 0;
     padding: 0 9px;
     border-radius: 50%;
     background-color: var(--accent-bg);
@@ -83,8 +82,7 @@ main {
     border: 1px solid rgba(217, 74, 114, 0.35);
     box-shadow: 0 0 8px rgba(217, 74, 114, 0.35), 0 0 16px rgba(217, 74, 114, 0.15), inset 0 0 6px rgba(217, 74, 114, 0.08);
     transition:
-        grid-template-columns 0.5s cubic-bezier(0.65, 0, 0.35, 1),
-        column-gap 0.5s cubic-bezier(0.65, 0, 0.35, 1),
+        gap 0.5s cubic-bezier(0.65, 0, 0.35, 1),
         border-radius 0.5s cubic-bezier(0.65, 0, 0.35, 1),
         background-color 0.35s ease,
         color 0.35s ease,
@@ -103,8 +101,7 @@ main {
 }
 @media (max-width: 767px) {
   .contact-button {
-    grid-template-columns: 24px 1fr;
-    column-gap: 8px;
+    gap: 8px;
     border-radius: 21px;
     background-color: var(--hover-bg);
     color: #faa3a3;
@@ -114,8 +111,7 @@ main {
     background-color: var(--hover-bg);
     color: #fff;
     transform: translateY(-1px);
-    grid-template-columns: 24px 1fr;
-    column-gap: 8px;
+    gap: 8px;
     border-radius: 10px;
     box-shadow: 0 0 14px rgba(217, 74, 114, 0.55), 0 0 28px rgba(217, 74, 114, 0.25), 0 0 20px rgba(77, 217, 230, 0.2);
     border-color: rgba(77, 217, 230, 0.5);
@@ -127,23 +123,25 @@ main {
 }
 .contact-text {
     display: inline-block;
-    opacity: 1;
+    /* ширина раскрытия: --text-max выставляется из JS (scrollWidth); фолбэк — SSR/без JS */
+    max-width: 0;
     overflow: hidden;
     min-width: 0;
     white-space: nowrap;
-    vertical-align: middle;
     clip-path: inset(0 100% 0 0);
-    transition: clip-path 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+    transition: clip-path 0.5s cubic-bezier(0.65, 0, 0.35, 1), max-width 0.5s cubic-bezier(0.65, 0, 0.35, 1);
     font-weight: 500;
     font-size: 0.875rem; /* 14px */
     color: inherit;
 }
 .contact-button:hover .contact-text {
+    max-width: var(--text-max, 200px);
     clip-path: inset(0 0 0 0);
-    transition: clip-path 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.05s;
+    transition: clip-path 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.05s, max-width 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.05s;
 }
 @media (max-width : 767px) {
   .contact-text {
+    max-width: none;
     clip-path: inset(0 0 0 0);
   }
 }
