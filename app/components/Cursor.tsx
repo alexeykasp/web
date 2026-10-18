@@ -258,9 +258,12 @@ export default function Cursor({ smoothnessCoefficient = 0.8 }: CursorProps) {
 
     const mouseMoveHandler = (e: MouseEvent) => {
       mousePosition.current = { x: e.clientX, y: e.clientY };
-      // возврат в окно во время улёта к краю или после Alt+Tab —
-      // отменяем улёт и мгновенно спавнимся в позиции мыши
-      if (exitTween.current.active || hiddenByBlur.current) {
+      // Возврат в окно: точка появляется там, где мышь ВОШЛА (края входа),
+      // а не выезжает от края, куда курсор улетал при уходе.
+      // !visible покрывает медленный возврат (улёт уже завершился и скрыл точку),
+      // hiddenByBlur — промежуток до перерендера после blur,
+      // exitTween.active — возврат прямо во время улёта.
+      if (exitTween.current.active || hiddenByBlur.current || !visible) {
         teleportNext.current = true;
         hiddenByBlur.current = false;
       }
