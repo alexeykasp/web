@@ -9,30 +9,44 @@ export type CursorProps = {
 
 const EXIT_DURATION_MS = 350;
 const EXIT_DISTANCE = 60;
+const SNAP_DURATION_MS = 450;
 
 function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3);
 }
 
-export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
+type Point = { x: number; y: number };
+type Size = { width: number; height: number };
+type Rect = { left: number; top: number; width: number; height: number };
+
+export default function Cursor({ smoothnessCoefficient = 0.85 }: CursorProps) {
   const trail = useRef<HTMLDivElement>(null);
-  const mousePosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const trailPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const trailSize = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const mousePosition = useRef<Point>({ x: 0, y: 0 });
+  const trailPosition = useRef<Point>({ x: 0, y: 0 });
+  const trailSize = useRef<Size>({ width: 0, height: 0 });
+
+  // Твин «прилипания» к карточке контакта: курсор уезжает в центр кнопки
+  // и раздувается до её размеров, принимая форму и transform карточки.
+  const snapTween = useRef<{ active: boolean; startTime: number; fromPos: Point; fromSize: Size }>({
+    active: false,
+    startTime: 0,
+    fromPos: { x: 0, y: 0 },
+    fromSize: { width: 0, height: 0 },
+  });
+  const snapped = useRef(false);
   const interactiveRef = useRef(false);
 
-  // Тween выхода за пределы окна: фиксированная длительность, не зависящая
+  // Твин выхода за пределы окна: фиксированная длительность, не зависящая
   // от того, где курсор был в момент ухода.
   const exitTween = useRef<{
     active: boolean;
     startTime: number;
-    from: { x: number; y: number };
-    to: { x: number; y: number };
+    from: Point;
+    to: Point;
   }>({ active: false, startTime: 0, from: { x: 0, y: 0 }, to: { x: 0, y: 0 } });
 
   const [active, setActive] = useState(false);
   const [visible, setVisible] = useState(false);
-  // null пока не проверили matchMedia (на сервере/до эффекта), чтобы не мигать
   const reducedMotion = usePrefersReducedMotion();
 
   // html.cursor-ready включает `cursor: none` в CSS только после монтирования —
@@ -80,30 +94,95 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
           mousePosition.current.x,
           mousePosition.current.y
         );
-        // computed cursor не подходит: html.cursor-ready * { cursor: none !important }
-        // перекрывает pointer у ссылок и кнопок — определяем интерактивность по DOM.
-        const isInteractive = !!hoveredElement?.closest(
-          "a, button, [role='button'], [data-cursor='pointer']"
-        );
+        const button = (hoveredElement?.closest(".contact-button") as HTMLElement | null) ?? null;
 
-        trailPosition.current.x =
-          trailPosition.current.x * smoothnessCoefficient +
-          mousePosition.current.x * (1 - smoothnessCoefficient);
-        trailPosition.current.y =
-          trailPosition.current.y * smoothnessCoefficient +
-          mousePosition.current.y * (1 - smoothnessCoefficient);
+        let rect: Rect | null = null;
+        if (button) {
+          let left = 0;
+          let top = 0;
+          let el: HTMLElement | null = button;
+          while (el) {
+            left += el.offsetLeft;
+            top += el.offsetTop;
+            el = el.offsetParent as HTMLElement | null;
+          }
+          rect = {
+            left: left - window.scrollX,
+            top: top - window.scrollY,
+            width: button.offsetWidth,
+            height: button.offsetHeight,
+          };
+        }
+
+        if (rect && button) {
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+
+          if (!snapped.current) {
+            snapTween.current = {
+              active: true,
+              startTime: performance.now(),
+              fromPos: { x: trailPosition.current.x, y: trailPosition.current.y },
+              fromSize: { width: trailSize.current.width, height: trailSize.current.height },
+            };
+            snapped.current = true;
+          }
+
+          if (snapTween.current.active) {
+            const progress = Math.min(
+              1,
+              (performance.now() - snapTween.current.startTime) / SNAP_DURATION_MS
+            );
+            const eased = easeOutCubic(progress);
+
+            trailPosition.current.x =
+              snapTween.current.fromPos.x + (centerX - snapTween.current.fromPos.x) * eased;
+            trailPosition.current.y =
+              snapTween.current.fromPos.y + (centerY - snapTween.current.fromPos.y) * eased;
+            trailSize.current.width =
+              snapTween.current.fromSize.width + (rect.width - snapTween.current.fromSize.width) * eased;
+            trailSize.current.height =
+              snapTween.current.fromSize.height +
+              (rect.height - snapTween.current.fromSize.height) * eased;
+
+            if (progress >= 1) snapTween.current.active = false;
+          } else {
+            trailPosition.current.x = centerX;
+            trailPosition.current.y = centerY;
+            trailSize.current.width = rect.width;
+            trailSize.current.height = rect.height;
+          }
+
+          // Курсор принимает форму карточки: border-radius и transform (tilt/раскрытие)
+          trail.current.style.borderRadius = getComputedStyle(button).borderRadius;
+          const buttonTransform = getComputedStyle(button).transform;
+          trail.current.style.transform =
+            buttonTransform && buttonTransform !== "none" ? buttonTransform : "none";
+        } else {
+          snapped.current = false;
+          snapTween.current.active = false;
+          trail.current.style.transform = "";
+
+          trailPosition.current.x =
+            trailPosition.current.x * smoothnessCoefficient +
+            mousePosition.current.x * (1 - smoothnessCoefficient);
+          trailPosition.current.y =
+            trailPosition.current.y * smoothnessCoefficient +
+            mousePosition.current.y * (1 - smoothnessCoefficient);
+          trailSize.current.width =
+            trailSize.current.width * smoothnessCoefficient + 14 * (1 - smoothnessCoefficient);
+          trailSize.current.height =
+            trailSize.current.height * smoothnessCoefficient + 14 * (1 - smoothnessCoefficient);
+          trail.current.style.borderRadius =
+            Math.min(trailSize.current.width, trailSize.current.height) / 2 + "px";
+        }
 
         trail.current.style.left = trailPosition.current.x + "px";
         trail.current.style.top = trailPosition.current.y + "px";
-
-        const sizeTarget = isInteractive ? { width: 46, height: 46 } : { width: 14, height: 14 };
-        trailSize.current.width =
-          trailSize.current.width * smoothnessCoefficient + sizeTarget.width * (1 - smoothnessCoefficient);
-        trailSize.current.height =
-          trailSize.current.height * smoothnessCoefficient + sizeTarget.height * (1 - smoothnessCoefficient);
         trail.current.style.width = trailSize.current.width + "px";
         trail.current.style.height = trailSize.current.height + "px";
 
+        const isInteractive = !!button;
         if (interactiveRef.current !== isInteractive) {
           interactiveRef.current = isInteractive;
           setActive(isInteractive);
@@ -111,6 +190,7 @@ export default function Cursor({ smoothnessCoefficient = 0.82 }: CursorProps) {
       }
       currentFrame = requestAnimationFrame(move);
     };
+
     currentFrame = requestAnimationFrame(move);
     return () => cancelAnimationFrame(currentFrame);
   }, [smoothnessCoefficient, reducedMotion]);
