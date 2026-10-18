@@ -55,7 +55,9 @@ function TiltCard({ children }: { children: React.ReactNode }) {
     const card = cardRef.current;
     if (!card) return;
     card.style.willChange = "transform";
-    card.style.transition = "transform 0.1s ease-out";
+    // box-shadow обязателен в каждом инлайн-transition: инлайн перезаписывает
+    // класс transition-shadow — иначе свечение при ховере выскакивает мгновенно
+    card.style.transition = "transform 0.1s ease-out, box-shadow 0.5s ease-out";
   };
 
   // Без setState на каждый пиксель: rAF + прямая запись transform,
@@ -92,7 +94,8 @@ function TiltCard({ children }: { children: React.ReactNode }) {
       frame.current = 0;
     }
     if (!card) return;
-    card.style.transition = "transform 0.5s cubic-bezier(0.16,1,0.3,1)";
+    card.style.transition =
+      "transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.5s ease-out";
     card.style.transform = CARD_BASE_TRANSFORM;
     card.style.willChange = "auto";
   };
