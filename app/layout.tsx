@@ -4,7 +4,7 @@ import Cursor from "./components/Cursor";
 
 export const metadata: Metadata = {
   title: "alexeykasp",
-  description: "BIO",
+  description: "Портфолио alexeykasp — Python, автоматизация, скрипты",
   icons: {
     icon: "/favicon.svg",
   },

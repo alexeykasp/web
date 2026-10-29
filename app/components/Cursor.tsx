@@ -48,6 +48,8 @@ export default function Cursor({ smoothnessCoefficient = 0.8 }: CursorProps) {
   // Текущая карточка-магнит: смена (в т.ч. на соседнюю) всегда перезапускает
   // твин из текущего положения — никаких мгновенных прыжков между карточками.
   const magnetEl = useRef<HTMLElement | null>(null);
+  // borderRadius кнопки меняется при hover-морфинге (50% → 10px) — читаем
+  // каждый кадр, иначе рамка точки отстаёт от формы карточки.
   const interactiveRef = useRef(false);
 
   // Твин выхода за пределы окна: фиксированная длительность, не зависящая
@@ -67,19 +69,6 @@ export default function Cursor({ smoothnessCoefficient = 0.8 }: CursorProps) {
   const [active, setActive] = useState(false);
   const [visible, setVisible] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
-
-  // html.cursor-ready сегодня ничего не прячет (системный курсор виден всегда),
-  // но класс остаётся для reduced-motion блока в CSS.
-  useEffect(() => {
-    if (reducedMotion === false) {
-      document.documentElement.classList.add("cursor-ready");
-    } else {
-      document.documentElement.classList.remove("cursor-ready");
-    }
-    return () => {
-      document.documentElement.classList.remove("cursor-ready");
-    };
-  }, [reducedMotion]);
 
   useEffect(() => {
     if (reducedMotion !== false) return;

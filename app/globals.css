@@ -1,18 +1,24 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 /* Prevent horizontal scrollbars during page load animations */
 html,
 body {
+  overflow-x: hidden;
   overflow-x: clip;
 }
+/* Все дизайн-токены в одном :root — перекрывает дефолты @import "tailwindcss" */
 :root {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+    --radius: 0.625rem;
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
 
-  --radius: 0.625rem;
+    --primary-color: #d94a72;
+    --bg-dark: #0b0710;
+    --text-color: #a888c9;
+    --header-bg: #d94a72;
+    --accent-bg: #170f24;
+    --hover-bg: #221731;
+    --shadow-color: #d94a72;
 }
 
 /***** Tailwind @apply заменён на чистый CSS для совместимости в редакторе ******/
@@ -21,17 +27,6 @@ body {
 }
 [data-slot="card"], .card {
   border-color: var(--header-bg);
-}
-:root {
-    --primary-color: #d94a72;
-    --bg-dark: #0b0710;
-    --text-color: #a888c9;
-    --header-bg: #d94a72;
-    --accent-bg: #170f24;
-    --hover-bg: #221731;
-    --shadow-color: #d94a72;
-    --tooltip-bg: #1c1329;
-    --glow-cyan: #4dd9e6;
 }
 html, body {
     margin: 0;
@@ -55,16 +50,12 @@ body::before {
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
     background-image:
         linear-gradient(rgba(217, 74, 114, 0.025) 1px, transparent 1px),
         linear-gradient(90deg, rgba(77, 217, 230, 0.02) 1px, transparent 1px);
     background-size: 42px 42px;
     mask-image: radial-gradient(circle at 50% 20%, black 0%, transparent 75%);
-}
-main {
-    position: relative;
-    z-index: 1;
 }
 .contact-button {
     position: relative;
@@ -116,6 +107,16 @@ main {
     box-shadow: 0 0 14px rgba(217, 74, 114, 0.55), 0 0 28px rgba(217, 74, 114, 0.25), 0 0 20px rgba(77, 217, 230, 0.2);
     border-color: rgba(77, 217, 230, 0.5);
 }
+/* Клавиатурный фокус: видимая обводка + тот же морфинг, что и при hover */
+.contact-button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    background-color: var(--hover-bg);
+    color: #fff;
+    gap: 8px;
+    border-radius: 10px;
+    border-color: rgba(77, 217, 230, 0.5);
+}
 .contact-icon {
     display: inline-flex;
     align-items: center;
@@ -131,31 +132,28 @@ main {
     overflow: hidden;
     min-width: 0;
     white-space: nowrap;
-    clip-path: inset(0 100% 0 0);
-    transition: clip-path 0.5s cubic-bezier(0.65, 0, 0.35, 1), max-width 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+    transition: max-width 0.5s cubic-bezier(0.65, 0, 0.35, 1);
     font-weight: 500;
     font-size: 0.875rem; /* 14px */
     color: inherit;
 }
 .contact-button:hover .contact-text {
     max-width: var(--text-max, 200px);
-    clip-path: inset(0 0 0 0);
-    transition: clip-path 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.05s, max-width 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.05s;
+    transition: max-width 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.05s;
+}
+.contact-button:focus-visible .contact-text {
+    max-width: var(--text-max, 200px);
+    transition: max-width 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.05s;
 }
 @media (max-width : 767px) {
   .contact-text {
     max-width: none;
-    clip-path: inset(0 0 0 0);
   }
 }
 
 /* Кастомный курсор (вдохновилён по референсу exterasquad/exterawebsite) */
-/* html.cursor-ready выставляется только после монта React-компонента Cursor,
-   чтобы до гидратации был виден обычный системный курсор (fallback),
-   а не пустота без какого-либо курсора вообще. */
 /* Системный курсор остаётся видимым всегда — кастомная точка только подсвечивает
-   карточку контакта, не подменяя стрелку. html.cursor-ready больше ничего не прячет. */
-/* Системный курсор НЕ скрываем: точка-подсветка живёт рядом со стрелкой. */
+   карточку контакта, не подменяя стрелку. */
 .custom-cursor-root > div {
   /* Свечение и рамка кольца появляются/уходят плавно, а не мгновенным
      «выскакиванием»: box-shadow перетекает, рамка 0↔1.5px дорисовывается. */
@@ -203,14 +201,6 @@ main {
   }
   .custom-cursor-root {
     display: none !important;
-  }
-  html.cursor-ready * {
-    cursor: auto !important;
-  }
-  html.cursor-ready a,
-  html.cursor-ready button,
-  html.cursor-ready [role="button"] {
-    cursor: pointer !important;
   }
 }
 

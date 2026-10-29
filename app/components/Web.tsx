@@ -93,6 +93,7 @@ function TiltCard({ children }: { children: React.ReactNode }) {
       cancelAnimationFrame(frame.current);
       frame.current = 0;
     }
+    if (reducedMotion) return;
     if (!card) return;
     card.style.transition =
       "transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.5s ease-out";
@@ -210,7 +211,7 @@ function TiltContactButton({ item, index }: { item: Contact; index: number }) {
       }}
     >
       <span className="contact-icon">
-        <Image src={item.svgSrc} alt={item.title} width={item.size} height={item.size} />
+        <Image src={item.svgSrc} alt="" width={item.size} height={item.size} />
       </span>
       <span className="contact-text" ref={textRef}>
         {item.title}
@@ -228,7 +229,7 @@ function MainContent() {
           className="mb-8 rounded-full overflow-hidden w-36 h-36 shadow-lg animate-avatar"
           style={{ boxShadow: "0 0 12px rgba(217,74,114,0.25)", border: "2px solid rgba(217,74,114,0.25)" }}
         >
-          <Image src={"/avatar.webp"} alt="Avatar" width={144} height={144} priority />
+          <Image src={"/avatar.webp"} alt="" width={144} height={144} priority />
         </div>
 
         <h1
@@ -260,7 +261,7 @@ function MainContent() {
           <TiltCard>
             <Card
               className="bg-[var(--accent-bg)] border border-[var(--header-bg)] shadow-[0_0_10px_var(--shadow-color)]"
-              style={{ color: "var(--primary-color)", borderColor: "var(--header-bg)" }}
+              style={{ color: "var(--primary-color)" }}
             >
               <CardContent className="p-6">
                 <h2 className="text-xl font-semibold mb-2">Навыки</h2>
